@@ -11,7 +11,7 @@ import {
   LineChart,
 } from "recharts";
 import AppLayout from "../components/layout/AppLayout";
-import StatCard from "../components/ui/StatCard";
+import StatCard from "../components/ui/StatCard.jsx";
 import ProductTable from "../components/ui/ProductTable";
 import { getProducts } from "../services/productService";
 import { getActivities } from "../services/activityService";
