@@ -1,4 +1,4 @@
-function TransactionTable({ transactions }) {
+function TransactionTable({ transactions, onGenerateReceipt }) {
   const getTypeClasses = (type) => {
     if (type === "IN") {
       return "bg-green-500/15 text-green-300";
@@ -78,6 +78,15 @@ function TransactionTable({ transactions }) {
               </div>
 
               <div className="rounded-xl bg-slate-950 p-3">
+                <p className="text-xs text-slate-500">Profit</p>
+                <p className="mt-1 font-semibold text-green-400">
+                  {transaction.type === "OUT"
+                    ? `₦${transaction.profit?.toLocaleString() || 0}`
+                    : "-"}
+                </p>
+              </div>
+
+              <div className="rounded-xl bg-slate-950 p-3">
                 <p className="text-xs text-slate-500">Payment</p>
                 <p className="mt-1 text-slate-200">
                   {transaction.paymentMethod || "N/A"}
@@ -100,6 +109,16 @@ function TransactionTable({ transactions }) {
             <p className="mt-3 text-xs text-slate-500">
               {formatDate(transaction.createdAt)}
             </p>
+
+            {transaction.type === "OUT" && (
+              <button
+                type="button"
+                onClick={() => onGenerateReceipt?.(transaction)}
+                className="mt-4 w-full rounded-xl border border-cyan-500/30 px-4 py-3 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/10"
+              >
+                Generate Receipt
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -115,10 +134,12 @@ function TransactionTable({ transactions }) {
                 <th className="px-5 py-4 font-medium">Quantity</th>
                 <th className="px-5 py-4 font-medium">Unit Price</th>
                 <th className="px-5 py-4 font-medium">Total Value</th>
+                <th className="px-5 py-4 font-medium">Profit</th>
                 <th className="px-5 py-4 font-medium">Customer</th>
                 <th className="px-5 py-4 font-medium">Payment</th>
                 <th className="px-5 py-4 font-medium">Note</th>
                 <th className="px-5 py-4 font-medium">Date</th>
+                <th className="px-5 py-4 font-medium">Receipt</th>
               </tr>
             </thead>
 
@@ -148,15 +169,35 @@ function TransactionTable({ transactions }) {
                   <td className="px-5 py-4 font-semibold text-cyan-300">
                     ₦{transaction.totalValue?.toLocaleString() || 0}
                   </td>
+                  <td className="px-5 py-4 font-semibold text-green-400">
+                    {transaction.type === "OUT"
+                      ? `₦${transaction.profit?.toLocaleString() || 0}`
+                      : "-"}
+                  </td>
                   <td className="px-5 py-4">
                     {transaction.customerName || "N/A"}
                   </td>
                   <td className="px-5 py-4">
                     {transaction.paymentMethod || "N/A"}
                   </td>
-                  <td className="px-5 py-4">{transaction.note || "No note"}</td>
+                  <td className="px-5 py-4">
+                    {transaction.note || "No note"}
+                  </td>
                   <td className="px-5 py-4">
                     {formatDate(transaction.createdAt)}
+                  </td>
+                  <td className="px-5 py-4">
+                    {transaction.type === "OUT" ? (
+                      <button
+                        type="button"
+                        onClick={() => onGenerateReceipt?.(transaction)}
+                        className="rounded-lg border border-cyan-500/30 px-3 py-2 text-xs font-semibold text-cyan-300 transition hover:bg-cyan-500/10"
+                      >
+                        Receipt
+                      </button>
+                    ) : (
+                      <span className="text-slate-500">N/A</span>
+                    )}
                   </td>
                 </tr>
               ))}

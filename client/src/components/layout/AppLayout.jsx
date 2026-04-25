@@ -11,9 +11,9 @@ function AppLayout({ children }) {
   return (
     <div className="min-h-screen overflow-x-hidden bg-slate-950 text-white lg:flex">
       {/* Desktop Sidebar */}
-      <div className="hidden w-64 shrink-0 border-r border-slate-800 lg:block">
-        <Sidebar />
-      </div>
+    <div className="fixed left-0 top-0 z-40 hidden h-screen w-64 border-r border-slate-800 bg-slate-950 lg:block">
+      <Sidebar />
+    </div>
 
       {/* Mobile Sidebar */}
       {isSidebarOpen && (
@@ -40,7 +40,7 @@ function AppLayout({ children }) {
       )}
 
       {/* Main Content */}
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col lg:ml-64">
         {/* Mobile Header */}
         <div className="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-950 px-4 py-3 lg:hidden">
           <div className="flex items-center gap-3">

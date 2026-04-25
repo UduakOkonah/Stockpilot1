@@ -34,6 +34,10 @@ const productSchema = new mongoose.Schema(
       required: [true, "Price is required"],
       min: 0,
     },
+    costPrice: {
+      type: Number,
+      default: 0,
+    },
     reorderLevel: {
       type: Number,
       default: 5,

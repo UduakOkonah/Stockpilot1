@@ -7,6 +7,7 @@ const activityRoutes = require("./routes/activityRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
 const authRoutes = require("./routes/authRoutes");
+const businessProfileRoutes = require("./routes/businessProfileRoutes");
 
 const app = express();
 
@@ -23,5 +24,6 @@ app.use("/api/activities", activityRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/business-profile", businessProfileRoutes);
 
 module.exports = app;

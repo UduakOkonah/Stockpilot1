@@ -9,7 +9,7 @@ const getDashboardSummary = async (req, res) => {
     const totalProducts = products.length;
 
     const totalStockUnits = products.reduce(
-      (sum, product) => sum + product.quantity,
+      (sum, product) => sum + (product.quantity || 0),
       0
     );
 
@@ -21,17 +21,33 @@ const getDashboardSummary = async (req, res) => {
       (product) => product.status === "Out of Stock"
     ).length;
 
-    const totalRevenue = transactions
-      .filter((transaction) => transaction.type === "OUT")
-      .reduce((sum, transaction) => sum + (transaction.totalValue || 0), 0);
+    const saleTransactions = transactions.filter(
+      (transaction) => transaction.type === "OUT"
+    );
 
-    const totalStockInUnits = transactions
-      .filter((transaction) => transaction.type === "IN")
-      .reduce((sum, transaction) => sum + transaction.quantity, 0);
+    const stockInTransactions = transactions.filter(
+      (transaction) => transaction.type === "IN"
+    );
 
-    const totalStockOutUnits = transactions
-      .filter((transaction) => transaction.type === "OUT")
-      .reduce((sum, transaction) => sum + transaction.quantity, 0);
+    const totalRevenue = saleTransactions.reduce(
+      (sum, transaction) => sum + (transaction.totalValue || 0),
+      0
+    );
+
+    const totalProfit = saleTransactions.reduce(
+      (sum, transaction) => sum + (transaction.profit || 0),
+      0
+    );
+
+    const totalStockInUnits = stockInTransactions.reduce(
+      (sum, transaction) => sum + (transaction.quantity || 0),
+      0
+    );
+
+    const totalStockOutUnits = saleTransactions.reduce(
+      (sum, transaction) => sum + (transaction.quantity || 0),
+      0
+    );
 
     res.status(200).json({
       totalProducts,
@@ -39,6 +55,7 @@ const getDashboardSummary = async (req, res) => {
       lowStockItems,
       outOfStockItems,
       totalRevenue,
+      totalProfit,
       totalStockInUnits,
       totalStockOutUnits,
     });

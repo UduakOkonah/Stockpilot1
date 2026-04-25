@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, ReceiptText } from "lucide-react";
+import { LayoutDashboard, Package, ReceiptText, Settings } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 function Sidebar({ onNavigate }) {
@@ -30,6 +30,12 @@ function Sidebar({ onNavigate }) {
         <NavLink to="/transactions" onClick={onNavigate} className={linkClasses}>
           <ReceiptText size={18} />
           Transactions
+        </NavLink>
+
+        {/* NEW: Settings */}
+        <NavLink to="/settings" onClick={onNavigate} className={linkClasses}>
+          <Settings size={18} />
+          Settings
         </NavLink>
       </nav>
     </aside>

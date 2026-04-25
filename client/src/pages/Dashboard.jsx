@@ -121,25 +121,46 @@ function Dashboard() {
   }, [transactions]);
 
   const revenueData = useMemo(() => {
-  const dailyRevenue = {};
+    const dailyRevenue = {};
 
-  transactions
-    .filter((transaction) => transaction.type === "OUT")
-    .forEach((transaction) => {
-      const date = new Date(transaction.createdAt).toLocaleDateString([], {
-        month: "short",
-        day: "numeric",
+    transactions
+      .filter((transaction) => transaction.type === "OUT")
+      .forEach((transaction) => {
+        const date = new Date(transaction.createdAt).toLocaleDateString([], {
+          month: "short",
+          day: "numeric",
+        });
+
+        dailyRevenue[date] =
+          (dailyRevenue[date] || 0) + (transaction.totalValue || 0);
       });
 
-      dailyRevenue[date] =
-        (dailyRevenue[date] || 0) + (transaction.totalValue || 0);
-    });
+    return Object.entries(dailyRevenue).map(([date, revenue]) => ({
+      date,
+      revenue,
+    }));
+  }, [transactions]);
 
-  return Object.entries(dailyRevenue).map(([date, revenue]) => ({
-    date,
-    revenue,
-  }));
-}, [transactions]);
+  const profitData = useMemo(() => {
+    const dailyProfit = {};
+
+    transactions
+      .filter((transaction) => transaction.type === "OUT")
+      .forEach((transaction) => {
+        const date = new Date(transaction.createdAt).toLocaleDateString([], {
+          month: "short",
+          day: "numeric",
+        });
+
+        dailyProfit[date] =
+          (dailyProfit[date] || 0) + (transaction.profit || 0);
+      });
+
+    return Object.entries(dailyProfit).map(([date, profit]) => ({
+      date,
+      profit,
+    }));
+  }, [transactions]);
 
   return (
     <AppLayout>
@@ -159,7 +180,7 @@ function Dashboard() {
           <p className="text-red-400">{error}</p>
         ) : (
           <>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
               <StatCard
                 title="Total Products"
                 value={summary?.totalProducts || 0}
@@ -185,8 +206,13 @@ function Dashboard() {
                 value={`₦${summary?.totalRevenue?.toLocaleString() || 0}`}
                 subtitle="Estimated sales value"
               />
-
+              <StatCard
+                title="Total Profit"
+                value={`₦${summary?.totalProfit?.toLocaleString() || 0}`}
+                subtitle="Estimated profit from sales"
+              />
             </div>
+
             <div className="mt-8">
               <LowStockAlerts products={products} />
             </div>
@@ -196,7 +222,10 @@ function Dashboard() {
             </div>
 
             <div className="mt-8">
-              <RestockSuggestions products={products} transactions={transactions} />
+              <RestockSuggestions
+                products={products}
+                transactions={transactions}
+              />
             </div>
 
             <div className="mt-8 grid gap-5 xl:grid-cols-2">
@@ -307,66 +336,135 @@ function Dashboard() {
                   )}
                 </div>
               </div>
-            </div>
 
-            <div className="rounded-2xl border border-cyan-500/20 bg-slate-900/80 p-4 xl:col-span-2">
-            <div className="mb-4">
-              <h2 className="text-base font-semibold text-white">Revenue Trend</h2>
-              <p className="mt-1 text-xs text-slate-400">
-                Estimated revenue from stock-out transactions.
-              </p>
-            </div>
-
-            <div className="h-56">
-              {revenueData.length === 0 ? (
-                <div className="flex h-full items-center justify-center rounded-xl border border-slate-800 bg-slate-950 text-sm text-slate-400">
-                  No revenue data yet.
+              <div className="rounded-2xl border border-cyan-500/20 bg-slate-900/80 p-4 xl:col-span-2">
+                <div className="mb-4">
+                  <h2 className="text-base font-semibold text-white">
+                    Revenue Trend
+                  </h2>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Estimated revenue from stock-out transactions.
+                  </p>
                 </div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={revenueData}>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke="#1e293b"
-                      vertical={false}
-                    />
-                    <XAxis
-                      dataKey="date"
-                      stroke="#64748b"
-                      tick={{ fontSize: 12 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      stroke="#64748b"
-                      tick={{ fontSize: 12 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <Tooltip
-                      cursor={{ stroke: "#334155" }}
-                      contentStyle={{
-                        backgroundColor: "#020617",
-                        border: "1px solid #334155",
-                        borderRadius: "12px",
-                        color: "#e5e7eb",
-                        fontSize: "12px",
-                      }}
-                      formatter={(value) => [`₦${value.toLocaleString()}`, "Revenue"]}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#22d3ee"
-                      strokeWidth={3}
-                      dot={{ r: 4, fill: "#22d3ee" }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
+
+                <div className="h-56">
+                  {revenueData.length === 0 ? (
+                    <div className="flex h-full items-center justify-center rounded-xl border border-slate-800 bg-slate-950 text-sm text-slate-400">
+                      No revenue data yet.
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={revenueData}>
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="#1e293b"
+                          vertical={false}
+                        />
+                        <XAxis
+                          dataKey="date"
+                          stroke="#64748b"
+                          tick={{ fontSize: 12 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          stroke="#64748b"
+                          tick={{ fontSize: 12 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          cursor={{ stroke: "#334155" }}
+                          contentStyle={{
+                            backgroundColor: "#020617",
+                            border: "1px solid #334155",
+                            borderRadius: "12px",
+                            color: "#e5e7eb",
+                            fontSize: "12px",
+                          }}
+                          formatter={(value) => [
+                            `₦${value.toLocaleString()}`,
+                            "Revenue",
+                          ]}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="revenue"
+                          stroke="#22d3ee"
+                          strokeWidth={3}
+                          dot={{ r: 4, fill: "#22d3ee" }}
+                          activeDot={{ r: 6 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-green-500/20 bg-slate-900/80 p-4 xl:col-span-2">
+                <div className="mb-4">
+                  <h2 className="text-base font-semibold text-white">
+                    Profit Trend
+                  </h2>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Estimated profit from completed sales.
+                  </p>
+                </div>
+
+                <div className="h-56">
+                  {profitData.length === 0 ? (
+                    <div className="flex h-full items-center justify-center rounded-xl border border-slate-800 bg-slate-950 text-sm text-slate-400">
+                      No profit data yet.
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={profitData}>
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="#1e293b"
+                          vertical={false}
+                        />
+                        <XAxis
+                          dataKey="date"
+                          stroke="#64748b"
+                          tick={{ fontSize: 12 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          stroke="#64748b"
+                          tick={{ fontSize: 12 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          cursor={{ stroke: "#334155" }}
+                          contentStyle={{
+                            backgroundColor: "#020617",
+                            border: "1px solid #334155",
+                            borderRadius: "12px",
+                            color: "#e5e7eb",
+                            fontSize: "12px",
+                          }}
+                          formatter={(value) => [
+                            `₦${value.toLocaleString()}`,
+                            "Profit",
+                          ]}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="profit"
+                          stroke="#4ade80"
+                          strokeWidth={3}
+                          dot={{ r: 4, fill: "#4ade80" }}
+                          activeDot={{ r: 6 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
 
             <div className="mt-8 grid gap-6 xl:grid-cols-[2fr_1fr]">
               <div>

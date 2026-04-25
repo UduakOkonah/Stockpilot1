@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import AppLayout from "../components/layout/AppLayout";
 import TransactionTable from "../components/ui/TransactionTable";
 import { getTransactions } from "../services/transactionService";
+import { getBusinessProfile } from "../services/businessProfileService";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 function Transactions() {
   const [transactions, setTransactions] = useState([]);
+  const [businessProfile, setBusinessProfile] = useState(null);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [loading, setLoading] = useState(true);
@@ -17,10 +19,14 @@ function Transactions() {
 
     const loadTransactions = async () => {
       try {
-        const data = await getTransactions();
+        const [transactionData, profileData] = await Promise.all([
+          getTransactions(),
+          getBusinessProfile(),
+        ]);
 
         if (isMounted) {
-          setTransactions(data);
+          setTransactions(transactionData);
+          setBusinessProfile(profileData);
           setError("");
         }
       } catch {
@@ -65,13 +71,20 @@ function Transactions() {
       .filter((transaction) => transaction.type === "OUT")
       .reduce((sum, transaction) => sum + (transaction.totalValue || 0), 0);
 
+    const totalProfit = transactions
+      .filter((transaction) => transaction.type === "OUT")
+      .reduce((sum, transaction) => sum + (transaction.profit || 0), 0);
+
     return {
       stockInCount,
       stockOutCount,
       totalUnitsMoved,
       totalRevenue,
+      totalProfit,
     };
   }, [transactions]);
+
+  const currency = businessProfile?.currency || "NGN";
 
   const escapeCsvValue = (value) => {
     if (value === null || value === undefined) return "";
@@ -102,6 +115,7 @@ function Transactions() {
       "Quantity",
       "Unit Price",
       "Total Value",
+      "Profit",
       "Customer",
       "Payment Method",
       "Note",
@@ -115,6 +129,7 @@ function Transactions() {
       transaction.quantity,
       transaction.unitPrice || 0,
       transaction.totalValue || 0,
+      transaction.type === "OUT" ? transaction.profit || 0 : "",
       transaction.customerName || "",
       transaction.paymentMethod || "",
       transaction.note || "",
@@ -151,10 +166,13 @@ function Transactions() {
       return;
     }
 
+    const businessName =
+      businessProfile?.businessName || "StockPilot Business";
+
     const doc = new jsPDF();
 
     doc.setFontSize(18);
-    doc.text("StockPilot Transactions Report", 14, 18);
+    doc.text(`${businessName} Transactions Report`, 14, 18);
 
     doc.setFontSize(10);
     doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 26);
@@ -164,13 +182,18 @@ function Transactions() {
     doc.text(`Stock Out Records: ${summary.stockOutCount}`, 14, 43);
     doc.text(`Total Units Moved: ${summary.totalUnitsMoved}`, 14, 50);
     doc.text(
-      `Estimated Revenue: NGN ${summary.totalRevenue.toLocaleString()}`,
+      `Estimated Revenue: ${currency} ${summary.totalRevenue.toLocaleString()}`,
       14,
       57
     );
+    doc.text(
+      `Total Profit: ${currency} ${summary.totalProfit.toLocaleString()}`,
+      14,
+      64
+    );
 
     autoTable(doc, {
-      startY: 66,
+      startY: 73,
       head: [
         [
           "Product",
@@ -179,6 +202,7 @@ function Transactions() {
           "Qty",
           "Unit Price",
           "Total Value",
+          "Profit",
           "Customer",
           "Payment",
           "Date",
@@ -189,14 +213,17 @@ function Transactions() {
         transaction.sku,
         transaction.type === "IN" ? "Stock In" : "Sale",
         transaction.quantity,
-        `NGN ${transaction.unitPrice?.toLocaleString() || 0}`,
-        `NGN ${transaction.totalValue?.toLocaleString() || 0}`,
+        `${currency} ${transaction.unitPrice?.toLocaleString() || 0}`,
+        `${currency} ${transaction.totalValue?.toLocaleString() || 0}`,
+        transaction.type === "OUT"
+          ? `${currency} ${transaction.profit?.toLocaleString() || 0}`
+          : "-",
         transaction.customerName || "N/A",
         transaction.paymentMethod || "N/A",
         new Date(transaction.createdAt).toLocaleString(),
       ]),
       styles: {
-        fontSize: 8,
+        fontSize: 7,
         cellPadding: 2,
       },
       headStyles: {
@@ -210,6 +237,105 @@ function Transactions() {
     );
 
     setError("");
+  };
+
+  const handleGenerateReceipt = (transaction) => {
+    const profile = businessProfile || {};
+    const receiptCurrency = profile.currency || "NGN";
+    const receiptPrefix = profile.receiptPrefix || "SP";
+    const businessName = profile.businessName || "StockPilot Business";
+
+    const doc = new jsPDF();
+
+    doc.setFillColor(15, 23, 42);
+    doc.rect(0, 0, 210, 36, "F");
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.text(businessName, 14, 14);
+
+    doc.setFontSize(9);
+    let y = 22;
+
+    if (profile.showBusinessEmail && profile.email) {
+      doc.text(`Email: ${profile.email}`, 14, y);
+      y += 5;
+    }
+
+    if (profile.showBusinessPhone && profile.phone) {
+      doc.text(`Phone: ${profile.phone}`, 14, y);
+      y += 5;
+    }
+
+    if (profile.showBusinessAddress && profile.address) {
+      doc.text(`Address: ${profile.address}`, 14, y);
+    }
+
+    doc.setTextColor(15, 23, 42);
+    doc.setFontSize(16);
+    doc.text("SALES RECEIPT", 14, 50);
+
+    doc.setFontSize(10);
+    doc.text(
+      `Receipt ID: ${receiptPrefix}-${transaction._id.slice(-6).toUpperCase()}`,
+      14,
+      60
+    );
+    doc.text(`Date: ${new Date(transaction.createdAt).toLocaleString()}`, 14, 67);
+
+    doc.text(
+      `Customer: ${transaction.customerName || "Walk-in Customer"}`,
+      14,
+      78
+    );
+    doc.text(`Payment Method: ${transaction.paymentMethod || "N/A"}`, 14, 85);
+
+    autoTable(doc, {
+      startY: 96,
+      head: [["Product", "SKU", "Qty", "Unit Price", "Total"]],
+      body: [
+        [
+          transaction.productName,
+          transaction.sku,
+          transaction.quantity,
+          `${receiptCurrency} ${
+            transaction.unitPrice?.toLocaleString() || 0
+          }`,
+          `${receiptCurrency} ${
+            transaction.totalValue?.toLocaleString() || 0
+          }`,
+        ],
+      ],
+      headStyles: {
+        fillColor: [15, 23, 42],
+        textColor: [255, 255, 255],
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 3,
+      },
+    });
+
+    const finalY = doc.lastAutoTable.finalY + 15;
+
+    doc.setFontSize(14);
+    doc.text(
+      `Total Paid: ${receiptCurrency} ${
+        transaction.totalValue?.toLocaleString() || 0
+      }`,
+      14,
+      finalY
+    );
+
+    if (profile.showThankYouMessage) {
+      doc.setFontSize(10);
+      doc.text("Thank you for your purchase.", 14, finalY + 14);
+    }
+
+    doc.setFontSize(9);
+    doc.text("Generated by StockPilot Smart Inventory System", 14, finalY + 22);
+
+    doc.save(`${receiptPrefix}-receipt-${transaction._id.slice(-6)}.pdf`);
   };
 
   return (
@@ -244,7 +370,7 @@ function Transactions() {
           </div>
         </div>
 
-        <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
             <p className="text-sm text-slate-400">Stock In Records</p>
             <h3 className="mt-3 text-3xl font-bold text-white">
@@ -269,7 +395,14 @@ function Transactions() {
           <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/10 p-5">
             <p className="text-sm text-cyan-200">Estimated Revenue</p>
             <h3 className="mt-3 text-3xl font-bold text-cyan-300">
-              ₦{summary.totalRevenue.toLocaleString()}
+              {currency} {summary.totalRevenue.toLocaleString()}
+            </h3>
+          </div>
+
+          <div className="rounded-2xl border border-green-500/20 bg-green-500/10 p-5">
+            <p className="text-sm text-green-200">Total Profit</p>
+            <h3 className="mt-3 text-3xl font-bold text-green-400">
+              {currency} {summary.totalProfit.toLocaleString()}
             </h3>
           </div>
         </div>
@@ -303,7 +436,10 @@ function Transactions() {
         {loading ? (
           <p className="text-slate-400">Loading transactions...</p>
         ) : (
-          <TransactionTable transactions={filteredTransactions} />
+          <TransactionTable
+            transactions={filteredTransactions}
+            onGenerateReceipt={handleGenerateReceipt}
+          />
         )}
       </section>
     </AppLayout>

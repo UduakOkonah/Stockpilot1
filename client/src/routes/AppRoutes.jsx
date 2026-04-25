@@ -5,6 +5,7 @@ import Transactions from "../pages/Transactions";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ProtectedRoute from "./ProtectedRoute";
+import Settings from "../pages/Settings";
 
 function AppRoutes() {
   return (
@@ -37,6 +38,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Transactions />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Settings />
           </ProtectedRoute>
         }
       />

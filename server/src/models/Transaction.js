@@ -27,6 +27,18 @@ const transactionSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    unitCost: {
+    type: Number,
+    default: 0,
+    },
+    totalCost: {
+    type: Number,
+    default: 0,
+    },
+    profit: {
+    type: Number,
+    default: 0,
+    },
     totalValue: {
       type: Number,
       default: 0,
@@ -42,6 +54,7 @@ const transactionSchema = new mongoose.Schema(
     },
     note: String,
   },
+
   {
     timestamps: true,
   }

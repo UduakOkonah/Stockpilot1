@@ -49,8 +49,16 @@ const createTransaction = async (req, res) => {
 
     await product.save();
 
-    const finalUnitPrice = unitPrice ?? product.price;
+    const finalUnitPrice =
+      unitPrice === "" || unitPrice === undefined
+        ? product.price
+        : Number(unitPrice);
+
+    const unitCost = product.costPrice || 0;
+
     const totalValue = type === "OUT" ? numericQuantity * finalUnitPrice : 0;
+    const totalCost = type === "OUT" ? numericQuantity * unitCost : 0;
+    const profit = type === "OUT" ? totalValue - totalCost : 0;
 
     const transaction = await Transaction.create({
       user: req.user._id,
@@ -60,7 +68,10 @@ const createTransaction = async (req, res) => {
       sku: product.sku,
       quantity: numericQuantity,
       unitPrice: finalUnitPrice,
+      unitCost,
       totalValue,
+      totalCost,
+      profit,
       customerName: type === "OUT" ? customerName || "" : "",
       paymentMethod: type === "OUT" ? paymentMethod || "" : "",
       note,
@@ -74,7 +85,7 @@ const createTransaction = async (req, res) => {
       change:
         type === "IN"
           ? `Stock increased by ${numericQuantity}`
-          : `Sold ${numericQuantity} unit(s). Sales value: ₦${totalValue.toLocaleString()}`,
+          : `Sold ${numericQuantity} unit(s). Sales value: ₦${totalValue.toLocaleString()}. Profit: ₦${profit.toLocaleString()}`,
     });
 
     res.status(201).json(transaction);

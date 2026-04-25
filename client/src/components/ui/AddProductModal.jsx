@@ -7,6 +7,7 @@ const initialFormData = {
   sku: "",
   category: "",
   quantity: "",
+  costPrice: "",
   price: "",
   reorderLevel: "",
   supplier: "",
@@ -19,6 +20,9 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
   const [error, setError] = useState("");
 
   if (!isOpen) return null;
+
+  const estimatedProfitPerUnit =
+    Number(formData.price || 0) - Number(formData.costPrice || 0);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,8 +54,10 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
         sku: formData.sku.trim(),
         category: formData.category.trim(),
         quantity: Number(formData.quantity),
+        costPrice: formData.costPrice === "" ? 0 : Number(formData.costPrice),
         price: Number(formData.price),
-        reorderLevel: formData.reorderLevel === "" ? 5 : Number(formData.reorderLevel),
+        reorderLevel:
+          formData.reorderLevel === "" ? 5 : Number(formData.reorderLevel),
         supplier: formData.supplier.trim(),
         description: formData.description.trim(),
       };
@@ -62,7 +68,8 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
       onClose();
     } catch (err) {
       setError(
-        err?.response?.data?.message || "Failed to create product. Please try again."
+        err?.response?.data?.message ||
+          "Failed to create product. Please try again."
       );
     } finally {
       setSubmitting(false);
@@ -154,7 +161,22 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
 
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-300">
-                Price
+                Cost Price
+              </label>
+              <input
+                type="number"
+                name="costPrice"
+                value={formData.costPrice}
+                onChange={handleChange}
+                min="0"
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
+                placeholder="Amount you bought it"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-300">
+                Selling Price
               </label>
               <input
                 type="number"
@@ -164,7 +186,7 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
                 required
                 min="0"
                 className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                placeholder="e.g. 3500"
+                placeholder="Amount you sell it"
               />
             </div>
 
@@ -181,6 +203,13 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
                 className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
                 placeholder="Default is 5"
               />
+            </div>
+
+            <div className="rounded-xl border border-green-500/20 bg-green-500/10 p-4">
+              <p className="text-sm text-green-200">Estimated Profit / Unit</p>
+              <h3 className="mt-2 text-xl font-bold text-green-400">
+                ₦{estimatedProfitPerUnit.toLocaleString()}
+              </h3>
             </div>
 
             <div className="md:col-span-2">

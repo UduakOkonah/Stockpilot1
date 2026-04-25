@@ -8,6 +8,7 @@ function EditProductModal({ isOpen, onClose, product, onProductUpdated }) {
     sku: product?.sku || "",
     category: product?.category || "",
     quantity: product?.quantity ?? "",
+    costPrice: product?.costPrice ?? "",
     price: product?.price ?? "",
     reorderLevel: product?.reorderLevel ?? "",
     supplier: product?.supplier || "",
@@ -18,6 +19,9 @@ function EditProductModal({ isOpen, onClose, product, onProductUpdated }) {
   const [error, setError] = useState("");
 
   if (!isOpen || !product) return null;
+
+  const estimatedProfitPerUnit =
+    Number(formData.price || 0) - Number(formData.costPrice || 0);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,6 +43,8 @@ function EditProductModal({ isOpen, onClose, product, onProductUpdated }) {
         sku: formData.sku.trim(),
         category: formData.category.trim(),
         quantity: Number(formData.quantity),
+        costPrice:
+          formData.costPrice === "" ? 0 : Number(formData.costPrice),
         price: Number(formData.price),
         reorderLevel:
           formData.reorderLevel === "" ? 5 : Number(formData.reorderLevel),
@@ -51,7 +57,8 @@ function EditProductModal({ isOpen, onClose, product, onProductUpdated }) {
       onClose();
     } catch (err) {
       setError(
-        err?.response?.data?.message || "Failed to update product. Please try again."
+        err?.response?.data?.message ||
+          "Failed to update product. Please try again."
       );
     } finally {
       setSubmitting(false);
@@ -139,7 +146,22 @@ function EditProductModal({ isOpen, onClose, product, onProductUpdated }) {
 
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-300">
-                Price
+                Cost Price
+              </label>
+              <input
+                type="number"
+                name="costPrice"
+                value={formData.costPrice}
+                onChange={handleChange}
+                min="0"
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+                placeholder="Amount you bought it"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-300">
+                Selling Price
               </label>
               <input
                 type="number"
@@ -149,6 +171,7 @@ function EditProductModal({ isOpen, onClose, product, onProductUpdated }) {
                 required
                 min="0"
                 className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+                placeholder="Amount you sell it"
               />
             </div>
 
@@ -164,6 +187,13 @@ function EditProductModal({ isOpen, onClose, product, onProductUpdated }) {
                 min="0"
                 className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
               />
+            </div>
+
+            <div className="rounded-xl border border-green-500/20 bg-green-500/10 p-4">
+              <p className="text-sm text-green-200">Estimated Profit / Unit</p>
+              <h3 className="mt-2 text-xl font-bold text-green-400">
+                ₦{estimatedProfitPerUnit.toLocaleString()}
+              </h3>
             </div>
 
             <div className="md:col-span-2">

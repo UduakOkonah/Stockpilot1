@@ -24,6 +24,7 @@ const createProduct = async (req, res) => {
       category,
       quantity,
       price,
+      costPrice,
       reorderLevel,
       supplier,
       description,
@@ -49,6 +50,8 @@ const createProduct = async (req, res) => {
       category: category?.trim(),
       quantity: Number(quantity),
       price: Number(price),
+      costPrice:
+        costPrice === "" || costPrice === undefined ? 0 : Number(costPrice),
       reorderLevel:
         reorderLevel === "" || reorderLevel === undefined
           ? 5
@@ -90,6 +93,7 @@ const updateProduct = async (req, res) => {
       category,
       quantity,
       price,
+      costPrice,
       reorderLevel,
       supplier,
       description,
@@ -120,6 +124,7 @@ const updateProduct = async (req, res) => {
 
     const oldQuantity = product.quantity;
     const oldPrice = product.price;
+    const oldCostPrice = product.costPrice;
     const oldCategory = product.category;
     const oldName = product.name;
 
@@ -128,6 +133,8 @@ const updateProduct = async (req, res) => {
     product.category = category?.trim();
     product.quantity = Number(quantity);
     product.price = Number(price);
+    product.costPrice =
+      costPrice === "" || costPrice === undefined ? 0 : Number(costPrice);
     product.reorderLevel =
       reorderLevel === "" || reorderLevel === undefined
         ? 5
@@ -151,6 +158,14 @@ const updateProduct = async (req, res) => {
 
     if (oldPrice !== updatedProduct.price) {
       changes.push(`price changed from ${oldPrice} to ${updatedProduct.price}`);
+    }
+
+    if (oldCostPrice !== updatedProduct.costPrice) {
+      changes.push(
+        `cost price changed from ${oldCostPrice || 0} to ${
+          updatedProduct.costPrice || 0
+        }`
+      );
     }
 
     if (oldQuantity !== updatedProduct.quantity) {
