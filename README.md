@@ -12,9 +12,9 @@ The platform was built to solve the common problem of manual stock tracking usin
 
 ## Live Demo
 
-Frontend: https://your-vercel-link.vercel.app
+Frontend: https://stockpilot-kohl.vercel.app/
 
-Backend API: https://your-render-link.onrender.com
+Backend API: https://stockpilot-h4dq.onrender.com
 
 ---
 
@@ -98,19 +98,19 @@ Backend API: https://your-render-link.onrender.com
 ## Screenshots
 
 ### Landing Page
-(Add screenshot here)
+![Landing page](client\src\assets\landing.png)
 
 ### Dashboard
-(Add screenshot here)
+![Dashboard page](client\src\assets\dashboard.png)
 
 ### Products Page
-(Add screenshot here)
+![Landing page](client\src\assets\product.png)
 
 ### Transactions Page
-(Add screenshot here)
+![Landing page](client\src\assets\transaction.png)
 
 ### Receipt Generation
-(Add screenshot here)
+![Landing page](client\src\assets\receipt.png)
 
 ---
 
@@ -138,12 +138,12 @@ stockpilot/
 
 ---
 
-## Installation
+## Installations
 
 ### Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/stockpilot.git
+git clone https://github.com/UduakOkonah/stockpilot
 ```
 
 ### Install Frontend Dependencies
@@ -229,9 +229,8 @@ Uduakobong Lawrence Okonah
 
 Software Developer | BYU-Idaho Software Development Student
 
-GitHub: https://github.com/yourusername
-
-LinkedIn: https://linkedin.com/in/yourprofile
+GitHub:  https://github.com/UduakOkonah
+LinkedIn: https://www.linkedin.com/in/uduakobong-okonah-b5bb96252/
 
 ---
 

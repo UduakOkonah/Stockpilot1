@@ -247,15 +247,21 @@ function Transactions() {
 
     const doc = new jsPDF();
 
-    doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, 210, 36, "F");
+    doc.setFillColor(2, 6, 23);
+    doc.rect(0, 0, 210, 42, "F");
+
+    doc.setFillColor(34, 211, 238);
+    doc.rect(0, 0, 6, 42, "F");
 
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
-    doc.text(businessName, 14, 14);
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text(businessName, 14, 16);
 
     doc.setFontSize(9);
-    let y = 22;
+    doc.setFont("helvetica", "normal");
+
+    let y = 24;
 
     if (profile.showBusinessEmail && profile.email) {
       doc.text(`Email: ${profile.email}`, 14, y);
@@ -271,27 +277,31 @@ function Transactions() {
       doc.text(`Address: ${profile.address}`, 14, y);
     }
 
+    doc.setFillColor(34, 211, 238);
+    doc.roundedRect(150, 12, 45, 16, 3, 3, "F");
+
+    doc.setTextColor(2, 6, 23);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("SALES RECEIPT", 157, 22);
+
     doc.setTextColor(15, 23, 42);
-    doc.setFontSize(16);
+    doc.setFont("helvetica", "normal");
     doc.text("SALES RECEIPT", 14, 50);
 
     doc.setFontSize(10);
     doc.text(
       `Receipt ID: ${receiptPrefix}-${transaction._id.slice(-6).toUpperCase()}`,
       14,
-      60
+      55
     );
-    doc.text(`Date: ${new Date(transaction.createdAt).toLocaleString()}`, 14, 67);
 
-    doc.text(
-      `Customer: ${transaction.customerName || "Walk-in Customer"}`,
-      14,
-      78
-    );
-    doc.text(`Payment Method: ${transaction.paymentMethod || "N/A"}`, 14, 85);
+    doc.text(`Date: ${new Date(transaction.createdAt).toLocaleString()}`, 14, 62);
+    doc.text(`Customer: ${transaction.customerName || "Walk-in Customer"}`, 14, 73);
+    doc.text(`Payment Method: ${transaction.paymentMethod || "N/A"}`, 14, 80);
 
     autoTable(doc, {
-      startY: 96,
+      startY: 92,
       head: [["Product", "SKU", "Qty", "Unit Price", "Total"]],
       body: [
         [
