@@ -104,13 +104,13 @@ Backend API: https://stockpilot-h4dq.onrender.com
 ![Dashboard page](client\src\assets\dashboard.png)
 
 ### Products Page
-![Landing page](client\src\assets\product.png)
+![Product page](client\src\assets\product.png)
 
 ### Transactions Page
-![Landing page](client\src\assets\transaction.png)
+![Transaction page](client\src\assets\transaction.png)
 
 ### Receipt Generation
-![Landing page](client\src\assets\receipt.png)
+![Receipt page](client\src\assets\receipt.png)
 
 ---
 
