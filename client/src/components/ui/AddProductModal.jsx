@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { createProduct } from "../../services/productService";
+import toast from "react-hot-toast";
 
 const initialFormData = {
   name: "",
@@ -33,48 +34,61 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
     }));
   };
 
-  const resetForm = () => {
-    setFormData(initialFormData);
-    setError("");
-  };
+const resetForm = () => {
+  setFormData(initialFormData);
+  setError("");
+};
 
-  const handleClose = () => {
+const handleClose = () => {
+  resetForm();
+  onClose();
+};
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setSubmitting(true);
+
+  const loadingToast = toast.loading("Creating product...");
+
+  try {
+    const payload = {
+      name: formData.name.trim(),
+      sku: formData.sku.trim(),
+      category: formData.category.trim(),
+      quantity: Number(formData.quantity),
+      costPrice:
+        formData.costPrice === "" ? 0 : Number(formData.costPrice),
+      price: Number(formData.price),
+      reorderLevel:
+        formData.reorderLevel === "" ? 5 : Number(formData.reorderLevel),
+      supplier: formData.supplier.trim(),
+      description: formData.description.trim(),
+    };
+
+    await createProduct(payload);
+
+    toast.success("Product created successfully!", {
+      id: loadingToast,
+    });
+
     resetForm();
+    onProductAdded();
     onClose();
-  };
+  } catch (err) {
+    const message =
+      err?.response?.data?.message ||
+      "Failed to create product. Please try again.";
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSubmitting(true);
+    setError(message);
 
-    try {
-      const payload = {
-        name: formData.name.trim(),
-        sku: formData.sku.trim(),
-        category: formData.category.trim(),
-        quantity: Number(formData.quantity),
-        costPrice: formData.costPrice === "" ? 0 : Number(formData.costPrice),
-        price: Number(formData.price),
-        reorderLevel:
-          formData.reorderLevel === "" ? 5 : Number(formData.reorderLevel),
-        supplier: formData.supplier.trim(),
-        description: formData.description.trim(),
-      };
-
-      await createProduct(payload);
-      resetForm();
-      onProductAdded();
-      onClose();
-    } catch (err) {
-      setError(
-        err?.response?.data?.message ||
-          "Failed to create product. Please try again."
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    toast.error(message, {
+      id: loadingToast,
+    });
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4">

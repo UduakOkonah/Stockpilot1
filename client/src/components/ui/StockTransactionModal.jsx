@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Minus, Plus, X } from "lucide-react";
 import { createTransaction } from "../../services/transactionService";
+import toast from "react-hot-toast";
 
 function StockTransactionModal({ isOpen, onClose, product, type, onCompleted }) {
   const [quantity, setQuantity] = useState("");
@@ -12,60 +13,87 @@ function StockTransactionModal({ isOpen, onClose, product, type, onCompleted }) 
 
   if (!isOpen || !product) return null;
 
-  const isStockIn = type === "IN";
-  const numericQuantity = Number(quantity);
-  const estimatedValue =
-    !isStockIn && numericQuantity > 0 ? numericQuantity * product.price : 0;
+const isStockIn = type === "IN";
+const numericQuantity = Number(quantity);
 
-  const resetForm = () => {
-    setQuantity("");
-    setNote("");
-    setCustomerName("");
-    setPaymentMethod("");
-    setError("");
-  };
+const estimatedValue =
+  !isStockIn && numericQuantity > 0 ? numericQuantity * product.price : 0;
 
-  const handleClose = () => {
+const estimatedProfit =
+  !isStockIn && numericQuantity > 0
+    ? numericQuantity * ((product.price || 0) - (product.costPrice || 0))
+    : 0;
+
+const resetForm = () => {
+  setQuantity("");
+  setNote("");
+  setCustomerName("");
+  setPaymentMethod("");
+  setError("");
+};
+
+const handleClose = () => {
+  resetForm();
+  onClose();
+};
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+
+  if (!numericQuantity || numericQuantity <= 0) {
+    const message = "Enter a valid quantity.";
+    setError(message);
+    toast.error(message);
+    return;
+  }
+
+  if (!isStockIn && numericQuantity > product.quantity) {
+    const message = "Not enough stock available.";
+    setError(message);
+    toast.error(message);
+    return;
+  }
+
+  setSubmitting(true);
+
+  const loadingToast = toast.loading(
+    isStockIn ? "Adding stock..." : "Recording sale..."
+  );
+
+  try {
+    await createTransaction({
+      productId: product._id,
+      type,
+      quantity: numericQuantity,
+      unitPrice: product.price,
+      customerName: isStockIn ? "" : customerName.trim(),
+      paymentMethod: isStockIn ? "" : paymentMethod,
+      note:
+        note.trim() ||
+        (isStockIn ? "Stock added" : "Product sold / stock removed"),
+    });
+
+    toast.success(isStockIn ? "Stock added successfully!" : "Sale recorded successfully!", {
+      id: loadingToast,
+    });
+
     resetForm();
+    await onCompleted();
     onClose();
-  };
+  } catch (err) {
+    const message =
+      err?.response?.data?.message || "Failed to complete stock transaction.";
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+    setError(message);
 
-    if (!numericQuantity || numericQuantity <= 0) {
-      setError("Enter a valid quantity.");
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      await createTransaction({
-        productId: product._id,
-        type,
-        quantity: numericQuantity,
-        unitPrice: product.price,
-        customerName: isStockIn ? "" : customerName.trim(),
-        paymentMethod: isStockIn ? "" : paymentMethod,
-        note:
-          note.trim() ||
-          (isStockIn ? "Stock added" : "Product sold / stock removed"),
-      });
-
-      resetForm();
-      await onCompleted();
-      onClose();
-    } catch (err) {
-      setError(
-        err?.response?.data?.message ||
-          "Failed to complete stock transaction."
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    toast.error(message, {
+      id: loadingToast,
+    });
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4">
@@ -116,6 +144,9 @@ function StockTransactionModal({ isOpen, onClose, product, type, onCompleted }) 
               <h3 className="mt-1 text-xl font-bold text-cyan-300">
                 ₦{estimatedValue.toLocaleString()}
               </h3>
+              <p className="text-sm text-green-400">
+                Estimated Profit: ₦{estimatedProfit.toLocaleString()}
+              </p>
             </div>
           )}
 

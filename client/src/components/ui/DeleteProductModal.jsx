@@ -1,6 +1,7 @@
 import { Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { deleteProduct } from "../../services/productService";
+import toast from "react-hot-toast";
 
 function DeleteProductModal({ isOpen, onClose, product, onDeleted }) {
   const [deleting, setDeleting] = useState(false);
@@ -8,22 +9,35 @@ function DeleteProductModal({ isOpen, onClose, product, onDeleted }) {
 
   if (!isOpen || !product) return null;
 
-  const handleDelete = async () => {
-    setDeleting(true);
-    setError("");
+const handleDelete = async () => {
+  setDeleting(true);
+  setError("");
 
-    try {
-      await deleteProduct(product._id);
-      await onDeleted();
-      onClose();
-    } catch (err) {
-      setError(
-        err?.response?.data?.message || "Failed to delete product. Try again."
-      );
-    } finally {
-      setDeleting(false);
-    }
-  };
+  const loadingToast = toast.loading("Deleting product...");
+
+  try {
+    await deleteProduct(product._id);
+
+    toast.success("Product deleted successfully!", {
+      id: loadingToast,
+    });
+
+    await onDeleted();
+    onClose();
+  } catch (err) {
+    const message =
+      err?.response?.data?.message ||
+      "Failed to delete product. Try again.";
+
+    setError(message);
+
+    toast.error(message, {
+      id: loadingToast,
+    });
+  } finally {
+    setDeleting(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4">

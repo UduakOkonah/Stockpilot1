@@ -95,25 +95,6 @@ Backend API: https://stockpilot-h4dq.onrender.com
 
 ---
 
-## Screenshots
-
-### Landing Page
-![Landing page](client\src\assets\landing.png)
-
-### Dashboard
-![Dashboard page](client\src\assets\dashboard.png)
-
-### Products Page
-![Product page](client\src\assets\product.png)
-
-### Transactions Page
-![Transaction page](client\src\assets\transaction.png)
-
-### Receipt Generation
-![Receipt page](client\src\assets\receipt.png)
-
----
-
 ## Project Structure
 
 ```bash

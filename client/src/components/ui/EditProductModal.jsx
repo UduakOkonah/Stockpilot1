@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { updateProduct } from "../../services/productService";
+import toast from "react-hot-toast";
 
 function EditProductModal({ isOpen, onClose, product, onProductUpdated }) {
   const [formData, setFormData] = useState(() => ({
@@ -15,55 +16,67 @@ function EditProductModal({ isOpen, onClose, product, onProductUpdated }) {
     description: product?.description || "",
   }));
 
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+const [submitting, setSubmitting] = useState(false);
+const [error, setError] = useState("");
 
-  if (!isOpen || !product) return null;
+if (!isOpen || !product) return null;
 
-  const estimatedProfitPerUnit =
-    Number(formData.price || 0) - Number(formData.costPrice || 0);
+const estimatedProfitPerUnit =
+  Number(formData.price || 0) - Number(formData.costPrice || 0);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+const handleChange = (e) => {
+  const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setError("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setSubmitting(true);
+  setError("");
 
-    try {
-      const payload = {
-        name: formData.name.trim(),
-        sku: formData.sku.trim(),
-        category: formData.category.trim(),
-        quantity: Number(formData.quantity),
-        costPrice:
-          formData.costPrice === "" ? 0 : Number(formData.costPrice),
-        price: Number(formData.price),
-        reorderLevel:
-          formData.reorderLevel === "" ? 5 : Number(formData.reorderLevel),
-        supplier: formData.supplier.trim(),
-        description: formData.description.trim(),
-      };
+  const loadingToast = toast.loading("Updating product...");
 
-      await updateProduct(product._id, payload);
-      await onProductUpdated();
-      onClose();
-    } catch (err) {
-      setError(
-        err?.response?.data?.message ||
-          "Failed to update product. Please try again."
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  try {
+    const payload = {
+      name: formData.name.trim(),
+      sku: formData.sku.trim(),
+      category: formData.category.trim(),
+      quantity: Number(formData.quantity),
+      costPrice:
+        formData.costPrice === "" ? 0 : Number(formData.costPrice),
+      price: Number(formData.price),
+      reorderLevel:
+        formData.reorderLevel === "" ? 5 : Number(formData.reorderLevel),
+      supplier: formData.supplier.trim(),
+      description: formData.description.trim(),
+    };
+
+    await updateProduct(product._id, payload);
+
+    toast.success("Product updated successfully!", {
+      id: loadingToast,
+    });
+
+    await onProductUpdated();
+    onClose();
+  } catch (err) {
+    const message =
+      err?.response?.data?.message ||
+      "Failed to update product. Please try again.";
+
+    setError(message);
+
+    toast.error(message, {
+      id: loadingToast,
+    });
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4">
