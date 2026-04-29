@@ -20,6 +20,7 @@ import { getTransactions } from "../services/transactionService";
 import LowStockAlerts from "../components/ui/LowStockAlerts";
 import SmartInsights from "../components/ui/SmartInsights";
 import RestockSuggestions from "../components/ui/RestockSuggestions";
+import useSettings from "../hooks/useSettings";
 
 const getActionClasses = (action) => {
   if (action === "CREATE") return "bg-green-500/15 text-green-300";
@@ -41,6 +42,8 @@ const formatActivityDate = (date) => {
 };
 
 function Dashboard() {
+  const { settings } = useSettings();
+
   const [products, setProducts] = useState([]);
   const [activities, setActivities] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -213,9 +216,11 @@ function Dashboard() {
               />
             </div>
 
-            <div className="mt-8">
-              <LowStockAlerts products={products} />
-            </div>
+            {settings?.lowStockAlerts && (
+              <div className="mt-8">
+                <LowStockAlerts products={products} />
+              </div>
+            )}
 
             <div className="mt-8">
               <SmartInsights products={products} transactions={transactions} />

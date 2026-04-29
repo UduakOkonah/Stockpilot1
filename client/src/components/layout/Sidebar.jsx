@@ -17,7 +17,7 @@ function Sidebar({ onNavigate }) {
       </div>
 
       <nav className="flex flex-col gap-2">
-        <NavLink to="/" onClick={onNavigate} className={linkClasses}>
+        <NavLink to="/dashboard" onClick={onNavigate} className={linkClasses}>
           <LayoutDashboard size={18} />
           Dashboard
         </NavLink>

@@ -17,7 +17,7 @@ function Login() {
     try {
       const data = await login(form);
       setUser(data);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       setError(err?.response?.data?.message || "Login failed");
     }

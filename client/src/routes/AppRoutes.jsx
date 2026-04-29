@@ -1,22 +1,23 @@
 import { Route, Routes } from "react-router-dom";
+import Landing from "../pages/Landing";
 import Dashboard from "../pages/Dashboard";
 import Products from "../pages/Products";
 import Transactions from "../pages/Transactions";
+import Settings from "../pages/Settings";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ProtectedRoute from "./ProtectedRoute";
-import Settings from "../pages/Settings";
 
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public routes */}
+      <Route path="/" element={<Landing />} />
+
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Protected routes */}
       <Route
-        path="/"
+        path="/dashboard"
         element={
           <ProtectedRoute>
             <Dashboard />

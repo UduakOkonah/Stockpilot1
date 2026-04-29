@@ -4,6 +4,7 @@ import {
   getBusinessProfile,
   updateBusinessProfile,
 } from "../services/businessProfileService";
+import useSettings from "../hooks/useSettings";
 
 function Toggle({ label, description, checked, onChange }) {
   return (
@@ -31,6 +32,8 @@ function Toggle({ label, description, checked, onChange }) {
 }
 
 function Settings() {
+  const { settings, setSettings } = useSettings();
+
   const [form, setForm] = useState({
     businessName: "",
     phone: "",
@@ -69,8 +72,12 @@ function Settings() {
             showBusinessPhone: data.showBusinessPhone ?? true,
             showBusinessAddress: data.showBusinessAddress ?? true,
             showThankYouMessage: data.showThankYouMessage ?? true,
-            lowStockAlertsEnabled: data.lowStockAlertsEnabled ?? true,
+            lowStockAlertsEnabled:
+              settings?.lowStockAlerts ??
+              data.lowStockAlertsEnabled ??
+              true,
           });
+
           setError("");
         }
       } catch {
@@ -89,7 +96,7 @@ function Settings() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [settings?.lowStockAlerts]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -105,6 +112,20 @@ function Settings() {
       ...prev,
       [field]: !prev[field],
     }));
+
+    if (field === "lowStockAlertsEnabled") {
+      setSettings((prev) => ({
+        ...prev,
+        lowStockAlerts: !prev.lowStockAlerts,
+      }));
+    }
+  };
+
+  const toggleAppSetting = (field) => {
+    setSettings((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -114,7 +135,12 @@ function Settings() {
     setError("");
 
     try {
-      const data = await updateBusinessProfile(form);
+      const payload = {
+        ...form,
+        lowStockAlertsEnabled: settings.lowStockAlerts,
+      };
+
+      const data = await updateBusinessProfile(payload);
 
       setForm({
         businessName: data.businessName || "",
@@ -127,7 +153,7 @@ function Settings() {
         showBusinessPhone: data.showBusinessPhone ?? true,
         showBusinessAddress: data.showBusinessAddress ?? true,
         showThankYouMessage: data.showThankYouMessage ?? true,
-        lowStockAlertsEnabled: data.lowStockAlertsEnabled ?? true,
+        lowStockAlertsEnabled: settings.lowStockAlerts,
       });
 
       setMessage("Settings saved successfully.");
@@ -154,6 +180,38 @@ function Settings() {
           <p className="text-slate-400">Loading settings...</p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+              <h2 className="text-lg font-semibold text-white">
+                Appearance
+              </h2>
+              <p className="mt-1 text-sm text-slate-400">
+                Control how StockPilot looks and behaves.
+              </p>
+
+              <div className="mt-5 grid gap-3">
+                <Toggle
+                  label="Dark mode"
+                  description="Switch between dark and light display mode."
+                  checked={settings.darkMode}
+                  onChange={() => toggleAppSetting("darkMode")}
+                />
+
+                <Toggle
+                  label="Email notifications"
+                  description="Prepare notification preference for future email alerts."
+                  checked={settings.emailNotifications}
+                  onChange={() => toggleAppSetting("emailNotifications")}
+                />
+
+                <Toggle
+                  label="Auto receipt download"
+                  description="Automatically download receipts after sales in future updates."
+                  checked={settings.autoReceiptDownload}
+                  onChange={() => toggleAppSetting("autoReceiptDownload")}
+                />
+              </div>
+            </div>
+
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
               <h2 className="text-lg font-semibold text-white">
                 Business Profile
@@ -302,7 +360,7 @@ function Settings() {
                 <Toggle
                   label="Enable low-stock alerts"
                   description="Show low-stock and out-of-stock warnings on dashboard."
-                  checked={form.lowStockAlertsEnabled}
+                  checked={settings.lowStockAlerts}
                   onChange={() => toggleField("lowStockAlertsEnabled")}
                 />
               </div>
