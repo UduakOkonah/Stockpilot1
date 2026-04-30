@@ -1,11 +1,15 @@
+import EmptyState from "./EmptyState";
+
 function TransactionTable({ transactions, onGenerateReceipt }) {
   const getTypeClasses = (type) => {
     if (type === "IN") {
-      return "bg-green-500/15 text-green-300";
+      return "bg-green-500/15 text-green-600 dark:text-green-300";
     }
 
-    return "bg-amber-500/15 text-amber-300";
+    return "bg-amber-500/15 text-amber-600 dark:text-amber-300";
   };
+
+  const formatMoney = (value) => `₦${Number(value || 0).toLocaleString()}`;
 
   const formatDate = (date) => {
     const transactionDate = new Date(date);
@@ -22,9 +26,10 @@ function TransactionTable({ transactions, onGenerateReceipt }) {
 
   if (transactions.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 px-5 py-8 text-center text-slate-400">
-        No transactions found.
-      </div>
+      <EmptyState
+        title="No transactions found"
+        message="Sales and stock movement records will appear here once transactions are created."
+      />
     );
   }
 
@@ -34,11 +39,11 @@ function TransactionTable({ transactions, onGenerateReceipt }) {
         {transactions.map((transaction) => (
           <div
             key={transaction._id}
-            className="rounded-2xl border border-slate-800 bg-slate-900 p-4"
+            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
           >
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <h3 className="font-semibold text-white">
+              <div className="min-w-0">
+                <h3 className="truncate font-semibold text-slate-950 dark:text-white">
                   {transaction.productName}
                 </h3>
                 <p className="mt-1 text-xs text-slate-500">
@@ -47,7 +52,7 @@ function TransactionTable({ transactions, onGenerateReceipt }) {
               </div>
 
               <span
-                className={`rounded-full px-3 py-1 text-xs font-semibold ${getTypeClasses(
+                className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${getTypeClasses(
                   transaction.type
                 )}`}
               >
@@ -56,52 +61,52 @@ function TransactionTable({ transactions, onGenerateReceipt }) {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-xl bg-slate-950 p-3">
+              <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
                 <p className="text-xs text-slate-500">Quantity</p>
-                <p className="mt-1 font-semibold text-white">
+                <p className="mt-1 font-semibold text-slate-950 dark:text-white">
                   {transaction.quantity}
                 </p>
               </div>
 
-              <div className="rounded-xl bg-slate-950 p-3">
+              <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
                 <p className="text-xs text-slate-500">Unit Price</p>
-                <p className="mt-1 text-slate-200">
-                  ₦{transaction.unitPrice?.toLocaleString() || 0}
+                <p className="mt-1 text-slate-700 dark:text-slate-200">
+                  {formatMoney(transaction.unitPrice)}
                 </p>
               </div>
 
-              <div className="rounded-xl bg-slate-950 p-3">
+              <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
                 <p className="text-xs text-slate-500">Total Value</p>
-                <p className="mt-1 font-semibold text-cyan-300">
-                  ₦{transaction.totalValue?.toLocaleString() || 0}
+                <p className="mt-1 font-semibold text-cyan-600 dark:text-cyan-300">
+                  {formatMoney(transaction.totalValue)}
                 </p>
               </div>
 
-              <div className="rounded-xl bg-slate-950 p-3">
+              <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
                 <p className="text-xs text-slate-500">Profit</p>
-                <p className="mt-1 font-semibold text-green-400">
+                <p className="mt-1 font-semibold text-green-600 dark:text-green-400">
                   {transaction.type === "OUT"
-                    ? `₦${transaction.profit?.toLocaleString() || 0}`
+                    ? formatMoney(transaction.profit)
                     : "-"}
                 </p>
               </div>
 
-              <div className="rounded-xl bg-slate-950 p-3">
+              <div className="col-span-2 rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
                 <p className="text-xs text-slate-500">Payment</p>
-                <p className="mt-1 text-slate-200">
+                <p className="mt-1 text-slate-700 dark:text-slate-200">
                   {transaction.paymentMethod || "N/A"}
                 </p>
               </div>
             </div>
 
             {transaction.customerName && (
-              <p className="mt-4 rounded-xl bg-slate-950 p-3 text-sm text-slate-400">
+              <p className="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-600 dark:bg-slate-950 dark:text-slate-400">
                 Customer: {transaction.customerName}
               </p>
             )}
 
             {transaction.note && (
-              <p className="mt-3 rounded-xl bg-slate-950 p-3 text-sm text-slate-400">
+              <p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-600 dark:bg-slate-950 dark:text-slate-400">
                 {transaction.note}
               </p>
             )}
@@ -114,7 +119,7 @@ function TransactionTable({ transactions, onGenerateReceipt }) {
               <button
                 type="button"
                 onClick={() => onGenerateReceipt?.(transaction)}
-                className="mt-4 w-full rounded-xl border border-cyan-500/30 px-4 py-3 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/10"
+                className="mt-4 w-full rounded-xl border border-cyan-500/30 px-4 py-3 text-sm font-semibold text-cyan-600 transition hover:bg-cyan-500/10 dark:text-cyan-300"
               >
                 Generate Receipt
               </button>
@@ -123,10 +128,10 @@ function TransactionTable({ transactions, onGenerateReceipt }) {
         ))}
       </div>
 
-      <div className="hidden overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 md:block">
+      <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 md:block">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-slate-800 bg-slate-950/60 text-slate-400">
+            <thead className="border-b border-slate-200 bg-slate-50 text-slate-500 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-400">
               <tr>
                 <th className="px-5 py-4 font-medium">Product</th>
                 <th className="px-5 py-4 font-medium">SKU</th>
@@ -147,9 +152,9 @@ function TransactionTable({ transactions, onGenerateReceipt }) {
               {transactions.map((transaction) => (
                 <tr
                   key={transaction._id}
-                  className="border-b border-slate-800 text-slate-300 last:border-b-0"
+                  className="border-b border-slate-200 text-slate-700 last:border-b-0 dark:border-slate-800 dark:text-slate-300"
                 >
-                  <td className="px-5 py-4 font-medium text-white">
+                  <td className="px-5 py-4 font-medium text-slate-950 dark:text-white">
                     {transaction.productName}
                   </td>
                   <td className="px-5 py-4">{transaction.sku}</td>
@@ -164,14 +169,14 @@ function TransactionTable({ transactions, onGenerateReceipt }) {
                   </td>
                   <td className="px-5 py-4">{transaction.quantity}</td>
                   <td className="px-5 py-4">
-                    ₦{transaction.unitPrice?.toLocaleString() || 0}
+                    {formatMoney(transaction.unitPrice)}
                   </td>
-                  <td className="px-5 py-4 font-semibold text-cyan-300">
-                    ₦{transaction.totalValue?.toLocaleString() || 0}
+                  <td className="px-5 py-4 font-semibold text-cyan-600 dark:text-cyan-300">
+                    {formatMoney(transaction.totalValue)}
                   </td>
-                  <td className="px-5 py-4 font-semibold text-green-400">
+                  <td className="px-5 py-4 font-semibold text-green-600 dark:text-green-400">
                     {transaction.type === "OUT"
-                      ? `₦${transaction.profit?.toLocaleString() || 0}`
+                      ? formatMoney(transaction.profit)
                       : "-"}
                   </td>
                   <td className="px-5 py-4">
@@ -191,7 +196,7 @@ function TransactionTable({ transactions, onGenerateReceipt }) {
                       <button
                         type="button"
                         onClick={() => onGenerateReceipt?.(transaction)}
-                        className="rounded-lg border border-cyan-500/30 px-3 py-2 text-xs font-semibold text-cyan-300 transition hover:bg-cyan-500/10"
+                        className="rounded-lg border border-cyan-500/30 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-500/10 dark:text-cyan-300"
                       >
                         Receipt
                       </button>

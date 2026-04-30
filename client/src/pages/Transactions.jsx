@@ -5,6 +5,8 @@ import { getTransactions } from "../services/transactionService";
 import { getBusinessProfile } from "../services/businessProfileService";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import EmptyState from "../components/ui/EmptyState";
+import Skeleton from "../components/ui/Skeleton";
 
 function Transactions() {
   const [transactions, setTransactions] = useState([]);
@@ -353,10 +355,10 @@ function Transactions() {
       <section>
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white sm:text-3xl">
+            <h1 className="text-2xl font-bold text-slate-950 dark:text-white sm:text-3xl">
               Transactions
             </h1>
-            <p className="mt-2 text-sm text-slate-400 sm:text-base">
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
               View stock-in, stock-out, and estimated sales movement history.
             </p>
           </div>
@@ -423,13 +425,13 @@ function Transactions() {
             placeholder="Search by product name or SKU..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500"
           />
 
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500"
           >
             <option value="ALL">All Types</option>
             <option value="IN">Stock In</option>
@@ -443,14 +445,33 @@ function Transactions() {
           </div>
         )}
 
-        {loading ? (
-          <p className="text-slate-400">Loading transactions...</p>
-        ) : (
-          <TransactionTable
-            transactions={filteredTransactions}
-            onGenerateReceipt={handleGenerateReceipt}
-          />
-        )}
+      {loading ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+          <Skeleton className="h-5 w-48 bg-slate-200 dark:bg-slate-800" />
+          <div className="mt-6 space-y-4">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton
+                key={index}
+                className="h-16 w-full bg-slate-200 dark:bg-slate-800"
+              />
+            ))}
+          </div>
+        </div>
+      ) : filteredTransactions.length === 0 ? (
+        <EmptyState
+          title={search || typeFilter !== "ALL" ? "No matching transactions" : "No transactions yet"}
+          message={
+            search || typeFilter !== "ALL"
+              ? "No transactions match your current search or filter."
+              : "Sales and stock movement records will appear here once transactions are created."
+          }
+        />
+      ) : (
+        <TransactionTable
+          transactions={filteredTransactions}
+          onGenerateReceipt={handleGenerateReceipt}
+        />
+      )}
       </section>
     </AppLayout>
   );

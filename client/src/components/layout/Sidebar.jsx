@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, ReceiptText, Settings } from "lucide-react";
+import { LayoutDashboard, Package, ReceiptText, Settings, UserCircle, FileBarChart, } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 function Sidebar({ onNavigate }) {
@@ -30,6 +30,16 @@ function Sidebar({ onNavigate }) {
         <NavLink to="/transactions" onClick={onNavigate} className={linkClasses}>
           <ReceiptText size={18} />
           Transactions
+        </NavLink>
+
+        <NavLink to="/reports" onClick={onNavigate} className={linkClasses}>
+          <FileBarChart size={18} />
+          Reports
+        </NavLink>
+
+        <NavLink to="/profile" onClick={onNavigate} className={linkClasses}>
+          <UserCircle size={18} />
+          Profile
         </NavLink>
 
         {/* NEW: Settings */}

@@ -21,6 +21,8 @@ import LowStockAlerts from "../components/ui/LowStockAlerts";
 import SmartInsights from "../components/ui/SmartInsights";
 import RestockSuggestions from "../components/ui/RestockSuggestions";
 import useSettings from "../hooks/useSettings";
+import DashboardSkeleton from "../components/ui/DashboardSkeleton";
+import EmptyState from "../components/ui/EmptyState";
 
 const getActionClasses = (action) => {
   if (action === "CREATE") return "bg-green-500/15 text-green-300";
@@ -178,7 +180,7 @@ function Dashboard() {
         </div>
 
         {loading ? (
-          <p className="text-slate-400">Loading dashboard...</p>
+          <DashboardSkeleton />
         ) : error ? (
           <p className="text-red-400">{error}</p>
         ) : (
@@ -495,11 +497,10 @@ function Dashboard() {
 
                 <div className="mt-6 space-y-4">
                   {activities.length === 0 ? (
-                    <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                      <p className="text-sm text-slate-400">
-                        No recent activity yet.
-                      </p>
-                    </div>
+                    <EmptyState
+                      title="No recent activity"
+                      message="Inventory updates, product changes, and sales activity will appear here."
+                    />
                   ) : (
                     activities.map((activity) => (
                       <div
