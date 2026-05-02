@@ -24,10 +24,30 @@ import useSettings from "../hooks/useSettings";
 import DashboardSkeleton from "../components/ui/DashboardSkeleton";
 import EmptyState from "../components/ui/EmptyState";
 
+const cardClasses =
+  "min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/80";
+
+const titleClasses = "text-base font-semibold text-slate-950 dark:text-white";
+const subtitleClasses = "mt-1 text-xs text-slate-500 dark:text-slate-400";
+
+const tooltipStyle = {
+  backgroundColor: "#020617",
+  border: "1px solid #334155",
+  borderRadius: "12px",
+  color: "#e5e7eb",
+  fontSize: "12px",
+};
+
 const getActionClasses = (action) => {
-  if (action === "CREATE") return "bg-green-500/15 text-green-300";
-  if (action === "UPDATE") return "bg-amber-500/15 text-amber-300";
-  return "bg-red-500/15 text-red-300";
+  if (action === "CREATE") {
+    return "bg-green-500/15 text-green-600 dark:text-green-300";
+  }
+
+  if (action === "UPDATE") {
+    return "bg-amber-500/15 text-amber-600 dark:text-amber-300";
+  }
+
+  return "bg-red-500/15 text-red-600 dark:text-red-300";
 };
 
 const formatActivityDate = (date) => {
@@ -96,33 +116,16 @@ function Dashboard() {
   const stockMovementData = useMemo(() => {
     const stockIn = transactions
       .filter((transaction) => transaction.type === "IN")
-      .reduce((sum, transaction) => sum + transaction.quantity, 0);
+      .reduce((sum, transaction) => sum + (transaction.quantity || 0), 0);
 
     const stockOut = transactions
       .filter((transaction) => transaction.type === "OUT")
-      .reduce((sum, transaction) => sum + transaction.quantity, 0);
+      .reduce((sum, transaction) => sum + (transaction.quantity || 0), 0);
 
     return [
       { name: "Stock In", quantity: stockIn },
       { name: "Stock Out", quantity: stockOut },
     ];
-  }, [transactions]);
-
-  const topMovedProducts = useMemo(() => {
-    const productMap = {};
-
-    transactions.forEach((transaction) => {
-      if (!productMap[transaction.productName]) {
-        productMap[transaction.productName] = 0;
-      }
-
-      productMap[transaction.productName] += transaction.quantity;
-    });
-
-    return Object.entries(productMap)
-      .map(([name, quantity]) => ({ name, quantity }))
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 5);
   }, [transactions]);
 
   const revenueData = useMemo(() => {
@@ -167,55 +170,32 @@ function Dashboard() {
     }));
   }, [transactions]);
 
+  const bestSellingProducts = summary?.bestSellingProducts || [];
+  const mostProfitableProducts = summary?.mostProfitableProducts || [];
+
   return (
     <AppLayout>
       <section>
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white sm:text-3xl">
+          <h1 className="text-2xl font-bold text-slate-950 dark:text-white sm:text-3xl">
             Inventory Dashboard
           </h1>
-          <p className="mt-2 text-sm text-slate-400 sm:text-base">
-            Track stock, monitor inventory health, and manage products.
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+            Track stock, monitor inventory health, sales performance, and profit.
           </p>
         </div>
 
         {loading ? (
           <DashboardSkeleton />
         ) : error ? (
-          <p className="text-red-400">{error}</p>
+          <p className="text-red-500 dark:text-red-400">{error}</p>
         ) : (
           <>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-              <StatCard
-                title="Total Products"
-                value={summary?.totalProducts || 0}
-                subtitle="All inventory items"
-              />
-              <StatCard
-                title="Total Stock Units"
-                value={summary?.totalStockUnits || 0}
-                subtitle="Combined quantity in stock"
-              />
-              <StatCard
-                title="Low Stock Items"
-                value={summary?.lowStockItems || 0}
-                subtitle="Need attention soon"
-              />
-              <StatCard
-                title="Out of Stock"
-                value={summary?.outOfStockItems || 0}
-                subtitle="Currently unavailable items"
-              />
-              <StatCard
-                title="Total Revenue"
-                value={`₦${summary?.totalRevenue?.toLocaleString() || 0}`}
-                subtitle="Estimated sales value"
-              />
-              <StatCard
-                title="Total Profit"
-                value={`₦${summary?.totalProfit?.toLocaleString() || 0}`}
-                subtitle="Estimated profit from sales"
-              />
+              <StatCard title="Total Products" value={summary?.totalProducts || 0} subtitle="All inventory items" />
+              <StatCard title="Total Stock Units" value={summary?.totalStockUnits || 0} subtitle="Combined quantity in stock" />
+              <StatCard title="Monthly Revenue" value={`₦${summary?.monthlyRevenue?.toLocaleString() || 0}`} subtitle="Revenue in the last 30 days" />
+              <StatCard title="Monthly Profit" value={`₦${summary?.monthlyProfit?.toLocaleString() || 0}`} subtitle="Profit in the last 30 days" />
             </div>
 
             {settings?.lowStockAlerts && (
@@ -229,317 +209,198 @@ function Dashboard() {
             </div>
 
             <div className="mt-8">
-              <RestockSuggestions
-                products={products}
-                transactions={transactions}
-              />
+              <RestockSuggestions products={products} transactions={transactions} />
             </div>
 
-            <div className="mt-8 grid gap-5 xl:grid-cols-2">
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4">
+            <div className="mt-8 grid min-w-0 gap-5 xl:grid-cols-2">
+              <div className={cardClasses}>
                 <div className="mb-4">
-                  <h2 className="text-base font-semibold text-white">
-                    Stock Movement
-                  </h2>
-                  <p className="mt-1 text-xs text-slate-400">
-                    Stock-in compared with stock-out.
-                  </p>
+                  <h2 className={titleClasses}>Stock Movement</h2>
+                  <p className={subtitleClasses}>Stock-in compared with stock-out.</p>
                 </div>
 
-                <div className="h-56">
+                <div className="h-56 min-w-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={stockMovementData} barSize={36}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="#1e293b"
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="name"
-                        stroke="#64748b"
-                        tick={{ fontSize: 12 }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        stroke="#64748b"
-                        tick={{ fontSize: 12 }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <Tooltip
-                        cursor={{ fill: "#0f172a" }}
-                        contentStyle={{
-                          backgroundColor: "#020617",
-                          border: "1px solid #334155",
-                          borderRadius: "12px",
-                          color: "#e5e7eb",
-                          fontSize: "12px",
-                        }}
-                      />
-                      <Bar
-                        dataKey="quantity"
-                        fill="#7dd3fc"
-                        radius={[8, 8, 0, 0]}
-                      />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" vertical={false} />
+                      <XAxis dataKey="name" stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                      <YAxis stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                      <Tooltip cursor={{ fill: "#0f172a" }} contentStyle={tooltipStyle} />
+                      <Bar dataKey="quantity" fill="#7dd3fc" radius={[8, 8, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4">
+              <div className={cardClasses}>
                 <div className="mb-4">
-                  <h2 className="text-base font-semibold text-white">
-                    Most Moved Products
-                  </h2>
-                  <p className="mt-1 text-xs text-slate-400">
-                    Top products by total movement.
-                  </p>
+                  <h2 className={titleClasses}>Best Selling Products</h2>
+                  <p className={subtitleClasses}>Top products by units sold.</p>
                 </div>
 
-                <div className="h-56">
-                  {topMovedProducts.length === 0 ? (
-                    <div className="flex h-full items-center justify-center rounded-xl border border-slate-800 bg-slate-950 text-sm text-slate-400">
-                      No movement data yet.
-                    </div>
+                <div className="h-56 min-w-0">
+                  {bestSellingProducts.length === 0 ? (
+                    <EmptyState title="No sales data yet" message="Best selling products will appear after sales are recorded." />
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={topMovedProducts} barSize={28}>
-                        <CartesianGrid
-                          strokeDasharray="3 3"
-                          stroke="#1e293b"
-                          vertical={false}
-                        />
-                        <XAxis
-                          dataKey="name"
-                          stroke="#64748b"
-                          tick={{ fontSize: 11 }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <YAxis
-                          stroke="#64748b"
-                          tick={{ fontSize: 12 }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <Tooltip
-                          cursor={{ fill: "#0f172a" }}
-                          contentStyle={{
-                            backgroundColor: "#020617",
-                            border: "1px solid #334155",
-                            borderRadius: "12px",
-                            color: "#e5e7eb",
-                            fontSize: "12px",
-                          }}
-                        />
-                        <Bar
-                          dataKey="quantity"
-                          fill="#c084fc"
-                          radius={[8, 8, 0, 0]}
-                        />
+                      <BarChart data={bestSellingProducts} barSize={28}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" vertical={false} />
+                        <XAxis dataKey="name" stroke="#64748b" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                        <Tooltip cursor={{ fill: "#0f172a" }} contentStyle={tooltipStyle} />
+                        <Bar dataKey="quantity" fill="#c084fc" radius={[8, 8, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-cyan-500/20 bg-slate-900/80 p-4 xl:col-span-2">
+              <div className={`${cardClasses} xl:col-span-2`}>
                 <div className="mb-4">
-                  <h2 className="text-base font-semibold text-white">
-                    Revenue Trend
-                  </h2>
-                  <p className="mt-1 text-xs text-slate-400">
-                    Estimated revenue from stock-out transactions.
-                  </p>
+                  <h2 className={titleClasses}>Revenue Trend</h2>
+                  <p className={subtitleClasses}>Estimated revenue from stock-out transactions.</p>
                 </div>
 
-                <div className="h-56">
+                <div className="h-56 min-w-0">
                   {revenueData.length === 0 ? (
-                    <div className="flex h-full items-center justify-center rounded-xl border border-slate-800 bg-slate-950 text-sm text-slate-400">
-                      No revenue data yet.
-                    </div>
+                    <EmptyState title="No revenue data yet" message="Revenue trends will appear after sales are recorded." />
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={revenueData}>
-                        <CartesianGrid
-                          strokeDasharray="3 3"
-                          stroke="#1e293b"
-                          vertical={false}
-                        />
-                        <XAxis
-                          dataKey="date"
-                          stroke="#64748b"
-                          tick={{ fontSize: 12 }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <YAxis
-                          stroke="#64748b"
-                          tick={{ fontSize: 12 }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" vertical={false} />
+                        <XAxis dataKey="date" stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                        <YAxis stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                         <Tooltip
                           cursor={{ stroke: "#334155" }}
-                          contentStyle={{
-                            backgroundColor: "#020617",
-                            border: "1px solid #334155",
-                            borderRadius: "12px",
-                            color: "#e5e7eb",
-                            fontSize: "12px",
-                          }}
-                          formatter={(value) => [
-                            `₦${value.toLocaleString()}`,
-                            "Revenue",
-                          ]}
+                          contentStyle={tooltipStyle}
+                          formatter={(value) => [`₦${value.toLocaleString()}`, "Revenue"]}
                         />
-                        <Line
-                          type="monotone"
-                          dataKey="revenue"
-                          stroke="#22d3ee"
-                          strokeWidth={3}
-                          dot={{ r: 4, fill: "#22d3ee" }}
-                          activeDot={{ r: 6 }}
-                        />
+                        <Line type="monotone" dataKey="revenue" stroke="#22d3ee" strokeWidth={3} dot={{ r: 4, fill: "#22d3ee" }} activeDot={{ r: 6 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   )}
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-green-500/20 bg-slate-900/80 p-4 xl:col-span-2">
+              <div className={`${cardClasses} xl:col-span-2`}>
                 <div className="mb-4">
-                  <h2 className="text-base font-semibold text-white">
-                    Profit Trend
-                  </h2>
-                  <p className="mt-1 text-xs text-slate-400">
-                    Estimated profit from completed sales.
-                  </p>
+                  <h2 className={titleClasses}>Profit Trend</h2>
+                  <p className={subtitleClasses}>Estimated profit from completed sales.</p>
                 </div>
 
-                <div className="h-56">
+                <div className="h-56 min-w-0">
                   {profitData.length === 0 ? (
-                    <div className="flex h-full items-center justify-center rounded-xl border border-slate-800 bg-slate-950 text-sm text-slate-400">
-                      No profit data yet.
-                    </div>
+                    <EmptyState title="No profit data yet" message="Profit trends will appear after sales are recorded." />
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={profitData}>
-                        <CartesianGrid
-                          strokeDasharray="3 3"
-                          stroke="#1e293b"
-                          vertical={false}
-                        />
-                        <XAxis
-                          dataKey="date"
-                          stroke="#64748b"
-                          tick={{ fontSize: 12 }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <YAxis
-                          stroke="#64748b"
-                          tick={{ fontSize: 12 }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" vertical={false} />
+                        <XAxis dataKey="date" stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                        <YAxis stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                         <Tooltip
                           cursor={{ stroke: "#334155" }}
-                          contentStyle={{
-                            backgroundColor: "#020617",
-                            border: "1px solid #334155",
-                            borderRadius: "12px",
-                            color: "#e5e7eb",
-                            fontSize: "12px",
-                          }}
-                          formatter={(value) => [
-                            `₦${value.toLocaleString()}`,
-                            "Profit",
-                          ]}
+                          contentStyle={tooltipStyle}
+                          formatter={(value) => [`₦${value.toLocaleString()}`, "Profit"]}
                         />
-                        <Line
-                          type="monotone"
-                          dataKey="profit"
-                          stroke="#4ade80"
-                          strokeWidth={3}
-                          dot={{ r: 4, fill: "#4ade80" }}
-                          activeDot={{ r: 6 }}
-                        />
+                        <Line type="monotone" dataKey="profit" stroke="#4ade80" strokeWidth={3} dot={{ r: 4, fill: "#4ade80" }} activeDot={{ r: 6 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   )}
                 </div>
               </div>
-            </div>
 
-            <div className="mt-8 grid gap-6 xl:grid-cols-[2fr_1fr]">
-              <div>
+              <div className={cardClasses}>
                 <div className="mb-4">
-                  <h2 className="text-xl font-semibold text-white">
-                    Products Overview
-                  </h2>
-                  <p className="text-sm text-slate-400">
-                    Quick view of current product records.
-                  </p>
+                  <h2 className={titleClasses}>Most Profitable Products</h2>
+                  <p className={subtitleClasses}>Products bringing in the highest profit.</p>
                 </div>
 
-                <ProductTable products={recentProducts} />
-              </div>
-
-              <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-                <h2 className="text-xl font-semibold text-white">
-                  Recent Activity
-                </h2>
-                <p className="mt-2 text-sm text-slate-400">
-                  Latest inventory actions across your system.
-                </p>
-
-                <div className="mt-6 space-y-4">
-                  {activities.length === 0 ? (
-                    <EmptyState
-                      title="No recent activity"
-                      message="Inventory updates, product changes, and sales activity will appear here."
-                    />
+                <div className="space-y-3">
+                  {mostProfitableProducts.length === 0 ? (
+                    <EmptyState title="No profit records" message="Profitable products will appear after sales are recorded." />
                   ) : (
-                    activities.map((activity) => (
+                    mostProfitableProducts.map((product, index) => (
                       <div
-                        key={activity._id}
-                        className="rounded-xl border border-slate-800 bg-slate-950 p-4"
+                        key={product.name}
+                        className="flex items-center justify-between rounded-xl bg-slate-50 p-3 dark:bg-slate-950"
                       >
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span
-                                className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${getActionClasses(
-                                  activity.action
-                                )}`}
-                              >
-                                {activity.action}
-                              </span>
-
-                              <p className="text-sm font-semibold text-white">
-                                {activity.productName}
-                              </p>
-                            </div>
-
-                            <p className="mt-2 text-sm text-slate-400">
-                              {activity.change}
-                            </p>
-
-                            <p className="mt-1 text-xs text-slate-500">
-                              SKU: {activity.sku}
-                            </p>
-                          </div>
-
-                          <span className="shrink-0 text-xs text-slate-500">
-                            {formatActivityDate(activity.createdAt)}
-                          </span>
+                        <div>
+                          <p className="font-semibold text-slate-950 dark:text-white">
+                            {index + 1}. {product.name}
+                          </p>
+                          <p className="text-xs text-slate-500">Profit generated</p>
                         </div>
+                        <p className="font-bold text-green-600 dark:text-green-400">
+                          ₦{product.profit?.toLocaleString() || 0}
+                        </p>
                       </div>
                     ))
                   )}
                 </div>
+              </div>
+
+              <div className={cardClasses}>
+                <div className="mb-4">
+                  <h2 className={titleClasses}>Products Overview</h2>
+                  <p className={subtitleClasses}>Quick view of current product records.</p>
+                </div>
+
+                <ProductTable products={recentProducts} />
+              </div>
+            </div>
+
+            <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="text-xl font-semibold text-slate-950 dark:text-white">
+                Recent Activity
+              </h2>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                Latest inventory actions across your system.
+              </p>
+
+              <div className="mt-6 space-y-4">
+                {activities.length === 0 ? (
+                  <EmptyState
+                    title="No recent activity"
+                    message="Inventory updates, product changes, and sales activity will appear here."
+                  />
+                ) : (
+                  activities.map((activity) => (
+                    <div
+                      key={activity._id}
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950"
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${getActionClasses(
+                                activity.action
+                              )}`}
+                            >
+                              {activity.action}
+                            </span>
+
+                            <p className="text-sm font-semibold text-slate-950 dark:text-white">
+                              {activity.productName}
+                            </p>
+                          </div>
+
+                          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                            {activity.change}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-500">
+                            SKU: {activity.sku}
+                          </p>
+                        </div>
+
+                        <span className="shrink-0 text-xs text-slate-500">
+                          {formatActivityDate(activity.createdAt)}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </>

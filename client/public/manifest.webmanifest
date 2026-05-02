@@ -1,0 +1,23 @@
+{
+  "name": "StockPilot",
+  "short_name": "StockPilot",
+  "description": "Smart inventory, sales, profit tracking, receipts, and reports for small businesses.",
+  "theme_color": "#020617",
+  "background_color": "#020617",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

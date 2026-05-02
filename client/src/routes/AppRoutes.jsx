@@ -10,6 +10,7 @@ import Register from "../pages/Register";
 import NotFound from "../pages/NotFound";
 import ProtectedRoute from "./ProtectedRoute";
 import Reports from "../pages/Reports";
+import InvoiceBuilder from "../pages/InvoiceBuilder";
 
 function AppRoutes() {
   return (
@@ -69,6 +70,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Reports />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/invoice-builder"
+        element={
+          <ProtectedRoute>
+            <InvoiceBuilder />
           </ProtectedRoute>
         }
       />
