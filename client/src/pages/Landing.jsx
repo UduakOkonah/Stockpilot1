@@ -83,22 +83,19 @@ function Landing() {
       <section className="mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-8">
         <nav className="flex items-center justify-between gap-4">
           <div className="mb-8 px-2">
-            <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900/70 p-3 shadow-lg backdrop-blur">
-              
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/20">
-                <img
-                  src="/stockpilotlogo.png"
-                  alt="StockPilot Logo"
-                  className="h-[50px] w-[0px] rounded-3xl bg-white object-contain p-2"
-                />
-              </div>
+            <div className="flex items-center gap-3">
+              <img
+                src="/stockpilotlogo.png"
+                alt="StockPilot Logo"
+                className="h-14 w-auto rounded-[60px] object-contain"
+              />
 
               <div>
-                <h1 className="text-2xl font-black tracking-tight text-white">
+                <h1 className="text-2xl font-black leading-none tracking-tight text-white">
                   StockPilot
                 </h1>
 
-                <p className="text-xs font-medium uppercase tracking-wider text-cyan-300">
+                <p className="mt-1 text-xs font-medium uppercase tracking-wider text-cyan-300">
                   Smart Inventory System
                 </p>
               </div>
@@ -124,9 +121,9 @@ function Landing() {
 
         <div className="grid flex-1 items-center gap-12 py-16 lg:grid-cols-2">
           <div>
-            <div className="mb-5 inline-flex rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300">
+            <p className="mb-5 text-sm font-medium text-cyan-300">
               Built for small businesses, shops, and vendors
-            </div>
+            </p>
 
             <h2 className="max-w-3xl text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
               Know your stock, sales, and profit without guesswork.
@@ -283,9 +280,9 @@ function Landing() {
       <section className="border-y border-slate-800 bg-slate-900/40 px-6 py-16">
         <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2">
           <div>
-            <div className="mb-4 inline-flex rounded-full border border-green-500/30 bg-green-500/10 px-4 py-2 text-sm text-green-300">
-              Built around real shop workflow
-            </div>
+          <p className="mb-4 text-sm font-medium text-green-300">
+            Built around real shop workflow
+          </p>
             <h2 className="text-3xl font-bold sm:text-4xl">
               From product entry to receipt generation in minutes.
             </h2>
