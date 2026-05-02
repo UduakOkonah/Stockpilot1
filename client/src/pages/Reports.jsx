@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AppLayout from "../components/layout/AppLayout";
 import EmptyState from "../components/ui/EmptyState";
 import Skeleton from "../components/ui/Skeleton";
@@ -62,26 +62,27 @@ function Reports() {
     };
   }, []);
 
-  const getPeriodKey = (dateValue) => {
+    const getPeriodKey = useCallback((dateValue) => {
     const date = new Date(dateValue);
     const year = date.getFullYear();
 
     if (period === "weekly") {
-      const firstDay = new Date(year, 0, 1);
-      const pastDays = Math.floor((date - firstDay) / 86400000);
-      const week = Math.ceil((pastDays + firstDay.getDay() + 1) / 7);
-      return `${year} - Week ${week}`;
+        const firstDay = new Date(year, 0, 1);
+        const pastDays = Math.floor((date - firstDay) / 86400000);
+        const week = Math.ceil((pastDays + firstDay.getDay() + 1) / 7);
+
+        return `${year} - Week ${week}`;
     }
 
     if (period === "yearly") {
-      return `${year}`;
+        return `${year}`;
     }
 
     return date.toLocaleDateString([], {
-      year: "numeric",
-      month: "short",
+        year: "numeric",
+        month: "short",
     });
-  };
+    }, [period]);
 
   const analytics = useMemo(() => {
     const sales = transactions.filter((transaction) => transaction.type === "OUT");
@@ -139,7 +140,7 @@ function Reports() {
       outOfStockProducts,
       periodRows: Object.values(grouped),
     };
-  }, [transactions, products, period]);
+}, [transactions, products, getPeriodKey]);
 
   const escapeCsvValue = (value) => {
     if (value === null || value === undefined) return "";
