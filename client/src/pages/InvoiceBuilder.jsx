@@ -503,8 +503,8 @@ useEffect(() => {
                     <h2 className="text-lg font-semibold text-slate-950 dark:text-white">
                       Invoice Preview
                     </h2>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {invoiceNumber}
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    {invoiceNumber}
                     </p>
                   </div>
 
@@ -513,13 +513,13 @@ useEffect(() => {
                   </div>
                 </div>
 
-                <div className="mt-6">
-                  {items.length === 0 ? (
-                    <EmptyState
-                      title="No invoice items"
-                      message="Select products and add quantities to build your invoice."
-                    />
-                  ) : (
+                    <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+                    {items.length === 0 ? (
+                        <EmptyState
+                        title="No invoice items"
+                        message="Select products and add quantities to build your invoice."
+                        />
+                    ) : (
                     <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
                       <div className="overflow-x-auto">
                         <table className="min-w-full text-left text-sm">

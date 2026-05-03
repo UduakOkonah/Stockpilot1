@@ -1,12 +1,39 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import AppLayout from "../components/layout/AppLayout";
 import TransactionTable from "../components/ui/TransactionTable";
+import EmptyState from "../components/ui/EmptyState";
+import Skeleton from "../components/ui/Skeleton";
 import { getTransactions } from "../services/transactionService";
 import { getBusinessProfile } from "../services/businessProfileService";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import EmptyState from "../components/ui/EmptyState";
-import Skeleton from "../components/ui/Skeleton";
+
+const cardClasses =
+  "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5";
+
+const inputClasses =
+  "w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none placeholder:text-slate-400 transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500";
+
+const secondaryButtonClasses =
+  "w-full rounded-xl border border-cyan-500/30 px-5 py-3 font-semibold text-cyan-600 transition hover:bg-cyan-500/10 dark:text-cyan-300 sm:w-auto";
+
+const primaryButtonClasses =
+  "w-full rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400 sm:w-auto";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const staggerContainer = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
 
 function Transactions() {
   const [transactions, setTransactions] = useState([]);
@@ -32,9 +59,13 @@ function Transactions() {
           setError("");
         }
       } catch {
-        if (isMounted) setError("Failed to load transactions.");
+        if (isMounted) {
+          setError("Failed to load transactions.");
+        }
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -65,7 +96,7 @@ function Transactions() {
     const stockOutCount = transactions.filter((t) => t.type === "OUT").length;
 
     const totalUnitsMoved = transactions.reduce(
-      (sum, transaction) => sum + transaction.quantity,
+      (sum, transaction) => sum + (transaction.quantity || 0),
       0
     );
 
@@ -298,8 +329,16 @@ function Transactions() {
       55
     );
 
-    doc.text(`Date: ${new Date(transaction.createdAt).toLocaleString()}`, 14, 62);
-    doc.text(`Customer: ${transaction.customerName || "Walk-in Customer"}`, 14, 73);
+    doc.text(
+      `Date: ${new Date(transaction.createdAt).toLocaleString()}`,
+      14,
+      62
+    );
+    doc.text(
+      `Customer: ${transaction.customerName || "Walk-in Customer"}`,
+      14,
+      73
+    );
     doc.text(`Payment Method: ${transaction.paymentMethod || "N/A"}`, 14, 80);
 
     autoTable(doc, {
@@ -310,12 +349,8 @@ function Transactions() {
           transaction.productName,
           transaction.sku,
           transaction.quantity,
-          `${receiptCurrency} ${
-            transaction.unitPrice?.toLocaleString() || 0
-          }`,
-          `${receiptCurrency} ${
-            transaction.totalValue?.toLocaleString() || 0
-          }`,
+          `${receiptCurrency} ${transaction.unitPrice?.toLocaleString() || 0}`,
+          `${receiptCurrency} ${transaction.totalValue?.toLocaleString() || 0}`,
         ],
       ],
       headStyles: {
@@ -352,13 +387,23 @@ function Transactions() {
 
   return (
     <AppLayout>
-      <section>
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <motion.section
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+        className="min-w-0"
+      >
+        <motion.div
+          variants={fadeUp}
+          transition={{ duration: 0.45 }}
+          className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+        >
           <div>
             <h1 className="text-2xl font-bold text-slate-950 dark:text-white sm:text-3xl">
               Transactions
             </h1>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400 sm:text-base">
               View stock-in, stock-out, and estimated sales movement history.
             </p>
           </div>
@@ -367,7 +412,7 @@ function Transactions() {
             <button
               type="button"
               onClick={handleExportCsv}
-              className="w-full rounded-xl border border-cyan-500/30 px-5 py-3 font-semibold text-cyan-300 transition hover:bg-cyan-500/10 sm:w-auto"
+              className={secondaryButtonClasses}
             >
               Export CSV
             </button>
@@ -375,104 +420,138 @@ function Transactions() {
             <button
               type="button"
               onClick={handleExportPdf}
-              className="w-full rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400 sm:w-auto"
+              className={primaryButtonClasses}
             >
               Export PDF
             </button>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-            <p className="text-sm text-slate-400">Stock In Records</p>
-            <h3 className="mt-3 text-3xl font-bold text-white">
-              {summary.stockInCount}
-            </h3>
-          </div>
+        <motion.div
+          variants={staggerContainer}
+          className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
+        >
+          {[
+            {
+              label: "Stock In Records",
+              value: summary.stockInCount,
+              className: cardClasses,
+              textClass: "text-slate-950 dark:text-white",
+              labelClass: "text-slate-600 dark:text-slate-400",
+            },
+            {
+              label: "Stock Out Records",
+              value: summary.stockOutCount,
+              className: cardClasses,
+              textClass: "text-slate-950 dark:text-white",
+              labelClass: "text-slate-600 dark:text-slate-400",
+            },
+            {
+              label: "Total Units Moved",
+              value: summary.totalUnitsMoved,
+              className: cardClasses,
+              textClass: "text-slate-950 dark:text-white",
+              labelClass: "text-slate-600 dark:text-slate-400",
+            },
+            {
+              label: "Estimated Revenue",
+              value: `${currency} ${summary.totalRevenue.toLocaleString()}`,
+              className:
+                "rounded-2xl border border-cyan-500/20 bg-cyan-500/10 p-4 shadow-sm sm:p-5",
+              textClass: "text-cyan-700 dark:text-cyan-300",
+              labelClass: "text-cyan-700 dark:text-cyan-200",
+            },
+            {
+              label: "Total Profit",
+              value: `${currency} ${summary.totalProfit.toLocaleString()}`,
+              className:
+                "rounded-2xl border border-green-500/20 bg-green-500/10 p-4 shadow-sm sm:p-5",
+              textClass: "text-green-700 dark:text-green-400",
+              labelClass: "text-green-700 dark:text-green-200",
+            },
+          ].map((item) => (
+            <motion.div
+              key={item.label}
+              variants={fadeUp}
+              transition={{ duration: 0.4 }}
+              className={item.className}
+            >
+              <p className={`text-sm ${item.labelClass}`}>{item.label}</p>
+              <h3 className={`mt-3 break-words text-2xl font-bold sm:text-3xl ${item.textClass}`}>
+                {item.value}
+              </h3>
+            </motion.div>
+          ))}
+        </motion.div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-            <p className="text-sm text-slate-400">Stock Out Records</p>
-            <h3 className="mt-3 text-3xl font-bold text-white">
-              {summary.stockOutCount}
-            </h3>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-            <p className="text-sm text-slate-400">Total Units Moved</p>
-            <h3 className="mt-3 text-3xl font-bold text-white">
-              {summary.totalUnitsMoved}
-            </h3>
-          </div>
-
-          <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/10 p-5">
-            <p className="text-sm text-cyan-200">Estimated Revenue</p>
-            <h3 className="mt-3 text-3xl font-bold text-cyan-300">
-              {currency} {summary.totalRevenue.toLocaleString()}
-            </h3>
-          </div>
-
-          <div className="rounded-2xl border border-green-500/20 bg-green-500/10 p-5">
-            <p className="text-sm text-green-200">Total Profit</p>
-            <h3 className="mt-3 text-3xl font-bold text-green-400">
-              {currency} {summary.totalProfit.toLocaleString()}
-            </h3>
-          </div>
-        </div>
-
-        <div className="mb-6 grid gap-3 rounded-2xl border border-slate-800 bg-slate-900 p-4 md:grid-cols-[1fr_180px]">
+        <motion.div
+          variants={fadeUp}
+          transition={{ duration: 0.45 }}
+          className="mb-6 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:grid-cols-[1fr_180px]"
+        >
           <input
             type="text"
             placeholder="Search by product name or SKU..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500"
+            className={inputClasses}
           />
 
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500"
+            className={inputClasses}
           >
             <option value="ALL">All Types</option>
             <option value="IN">Stock In</option>
             <option value="OUT">Stock Out</option>
           </select>
-        </div>
+        </motion.div>
 
         {error && !loading && (
-          <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <motion.div
+            variants={fadeUp}
+            transition={{ duration: 0.4 }}
+            className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
+          >
             {error}
-          </div>
+          </motion.div>
         )}
 
-      {loading ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-          <Skeleton className="h-5 w-48 bg-slate-200 dark:bg-slate-800" />
-          <div className="mt-6 space-y-4">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <Skeleton
-                key={index}
-                className="h-16 w-full bg-slate-200 dark:bg-slate-800"
+        <motion.div variants={fadeUp} transition={{ duration: 0.45 }}>
+          {loading ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <Skeleton className="h-5 w-48" />
+
+              <div className="mt-6 space-y-4">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <Skeleton key={index} className="h-16 w-full rounded-xl" />
+                ))}
+              </div>
+            </div>
+          ) : filteredTransactions.length === 0 ? (
+            <EmptyState
+              title={
+                search || typeFilter !== "ALL"
+                  ? "No matching transactions"
+                  : "No transactions yet"
+              }
+              message={
+                search || typeFilter !== "ALL"
+                  ? "No transactions match your current search or filter."
+                  : "Sales and stock movement records will appear here once transactions are created."
+              }
+            />
+          ) : (
+            <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <TransactionTable
+                transactions={filteredTransactions}
+                onGenerateReceipt={handleGenerateReceipt}
               />
-            ))}
-          </div>
-        </div>
-      ) : filteredTransactions.length === 0 ? (
-        <EmptyState
-          title={search || typeFilter !== "ALL" ? "No matching transactions" : "No transactions yet"}
-          message={
-            search || typeFilter !== "ALL"
-              ? "No transactions match your current search or filter."
-              : "Sales and stock movement records will appear here once transactions are created."
-          }
-        />
-      ) : (
-        <TransactionTable
-          transactions={filteredTransactions}
-          onGenerateReceipt={handleGenerateReceipt}
-        />
-      )}
-      </section>
+            </div>
+          )}
+        </motion.div>
+      </motion.section>
     </AppLayout>
   );
 }

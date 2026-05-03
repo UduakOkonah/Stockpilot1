@@ -3,32 +3,36 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
-  Line,
-  LineChart,
 } from "recharts";
 import AppLayout from "../components/layout/AppLayout";
-import StatCard from "../components/ui/StatCard.jsx";
+import StatCard from "../components/ui/StatCard";
 import ProductTable from "../components/ui/ProductTable";
+import LowStockAlerts from "../components/ui/LowStockAlerts";
+import SmartInsights from "../components/ui/SmartInsights";
+import RestockSuggestions from "../components/ui/RestockSuggestions";
+import DashboardSkeleton from "../components/ui/DashboardSkeleton";
+import EmptyState from "../components/ui/EmptyState";
+import useSettings from "../hooks/useSettings";
 import { getProducts } from "../services/productService";
 import { getActivities } from "../services/activityService";
 import { getDashboardSummary } from "../services/dashboardService";
 import { getTransactions } from "../services/transactionService";
-import LowStockAlerts from "../components/ui/LowStockAlerts";
-import SmartInsights from "../components/ui/SmartInsights";
-import RestockSuggestions from "../components/ui/RestockSuggestions";
-import useSettings from "../hooks/useSettings";
-import DashboardSkeleton from "../components/ui/DashboardSkeleton";
-import EmptyState from "../components/ui/EmptyState";
 
 const cardClasses =
-  "min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/80";
+  "min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/80 sm:p-5";
 
 const titleClasses = "text-base font-semibold text-slate-950 dark:text-white";
+
 const subtitleClasses = "mt-1 text-xs text-slate-500 dark:text-slate-400";
+
+const chartGridColor = "#cbd5e1";
+const chartAxisColor = "#64748b";
 
 const tooltipStyle = {
   backgroundColor: "#020617",
@@ -37,6 +41,14 @@ const tooltipStyle = {
   color: "#e5e7eb",
   fontSize: "12px",
 };
+
+function ChartBox({ children }) {
+  return (
+    <div className="relative h-72 w-full min-w-0 overflow-hidden">
+      {children}
+    </div>
+  );
+}
 
 const getActionClasses = (action) => {
   if (action === "CREATE") {
@@ -86,13 +98,13 @@ function Dashboard() {
             getTransactions(),
           ]);
 
-        if (isMounted) {
-          setProducts(productData);
-          setActivities(activityData);
-          setSummary(summaryData);
-          setTransactions(transactionData);
-          setError("");
-        }
+        if (!isMounted) return;
+
+        setProducts(productData || []);
+        setActivities(activityData || []);
+        setSummary(summaryData || {});
+        setTransactions(transactionData || []);
+        setError("");
       } catch {
         if (isMounted) {
           setError("Failed to load dashboard data.");
@@ -175,12 +187,13 @@ function Dashboard() {
 
   return (
     <AppLayout>
-      <section>
+      <section className="min-w-0">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-slate-950 dark:text-white sm:text-3xl">
             Inventory Dashboard
           </h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400 sm:text-base">
             Track stock, monitor inventory health, sales performance, and profit.
           </p>
         </div>
@@ -188,14 +201,35 @@ function Dashboard() {
         {loading ? (
           <DashboardSkeleton />
         ) : error ? (
-          <p className="text-red-500 dark:text-red-400">{error}</p>
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-600 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
+            {error}
+          </div>
         ) : (
           <>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-              <StatCard title="Total Products" value={summary?.totalProducts || 0} subtitle="All inventory items" />
-              <StatCard title="Total Stock Units" value={summary?.totalStockUnits || 0} subtitle="Combined quantity in stock" />
-              <StatCard title="Monthly Revenue" value={`₦${summary?.monthlyRevenue?.toLocaleString() || 0}`} subtitle="Revenue in the last 30 days" />
-              <StatCard title="Monthly Profit" value={`₦${summary?.monthlyProfit?.toLocaleString() || 0}`} subtitle="Profit in the last 30 days" />
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <StatCard
+                title="Total Products"
+                value={summary?.totalProducts || 0}
+                subtitle="All inventory items"
+              />
+
+              <StatCard
+                title="Total Stock Units"
+                value={summary?.totalStockUnits || 0}
+                subtitle="Combined quantity in stock"
+              />
+
+              <StatCard
+                title="Monthly Revenue"
+                value={`₦${summary?.monthlyRevenue?.toLocaleString() || 0}`}
+                subtitle="Revenue in the last 30 days"
+              />
+
+              <StatCard
+                title="Monthly Profit"
+                value={`₦${summary?.monthlyProfit?.toLocaleString() || 0}`}
+                subtitle="Profit in the last 30 days"
+              />
             </div>
 
             {settings?.lowStockAlerts && (
@@ -209,27 +243,63 @@ function Dashboard() {
             </div>
 
             <div className="mt-8">
-              <RestockSuggestions products={products} transactions={transactions} />
+              <RestockSuggestions
+                products={products}
+                transactions={transactions}
+              />
             </div>
 
             <div className="mt-8 grid min-w-0 gap-5 xl:grid-cols-2">
               <div className={cardClasses}>
                 <div className="mb-4">
                   <h2 className={titleClasses}>Stock Movement</h2>
-                  <p className={subtitleClasses}>Stock-in compared with stock-out.</p>
+                  <p className={subtitleClasses}>
+                    Stock-in compared with stock-out.
+                  </p>
                 </div>
 
-                <div className="h-56 min-w-0">
-                  <ResponsiveContainer width="100%" height="100%">
+                <ChartBox>
+                  <ResponsiveContainer
+                    width="100%"
+                    height="100%"
+                    minWidth={300}
+                    minHeight={250}
+                  >
                     <BarChart data={stockMovementData} barSize={36}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" vertical={false} />
-                      <XAxis dataKey="name" stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                      <YAxis stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                      <Tooltip cursor={{ fill: "#0f172a" }} contentStyle={tooltipStyle} />
-                      <Bar dataKey="quantity" fill="#7dd3fc" radius={[8, 8, 0, 0]} />
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke={chartGridColor}
+                        vertical={false}
+                      />
+
+                      <XAxis
+                        dataKey="name"
+                        stroke={chartAxisColor}
+                        tick={{ fontSize: 12 }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+
+                      <YAxis
+                        stroke={chartAxisColor}
+                        tick={{ fontSize: 12 }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+
+                      <Tooltip
+                        cursor={{ fill: "#f1f5f9" }}
+                        contentStyle={tooltipStyle}
+                      />
+
+                      <Bar
+                        dataKey="quantity"
+                        fill="#06b6d4"
+                        radius={[8, 8, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartBox>
               </div>
 
               <div className={cardClasses}>
@@ -238,98 +308,219 @@ function Dashboard() {
                   <p className={subtitleClasses}>Top products by units sold.</p>
                 </div>
 
-                <div className="h-56 min-w-0">
-                  {bestSellingProducts.length === 0 ? (
-                    <EmptyState title="No sales data yet" message="Best selling products will appear after sales are recorded." />
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%">
+                {bestSellingProducts.length === 0 ? (
+                  <EmptyState
+                    title="No sales data yet"
+                    message="Best selling products will appear after sales are recorded."
+                  />
+                ) : (
+                  <ChartBox>
+                    <ResponsiveContainer
+                      width="100%"
+                      height="100%"
+                      minWidth={300}
+                      minHeight={250}
+                    >
                       <BarChart data={bestSellingProducts} barSize={28}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" vertical={false} />
-                        <XAxis dataKey="name" stroke="#64748b" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                        <YAxis stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                        <Tooltip cursor={{ fill: "#0f172a" }} contentStyle={tooltipStyle} />
-                        <Bar dataKey="quantity" fill="#c084fc" radius={[8, 8, 0, 0]} />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke={chartGridColor}
+                          vertical={false}
+                        />
+
+                        <XAxis
+                          dataKey="name"
+                          stroke={chartAxisColor}
+                          tick={{ fontSize: 11 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+
+                        <YAxis
+                          stroke={chartAxisColor}
+                          tick={{ fontSize: 12 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+
+                        <Tooltip
+                          cursor={{ fill: "#f1f5f9" }}
+                          contentStyle={tooltipStyle}
+                        />
+
+                        <Bar
+                          dataKey="quantity"
+                          fill="#8b5cf6"
+                          radius={[8, 8, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
-                  )}
-                </div>
+                  </ChartBox>
+                )}
               </div>
 
               <div className={`${cardClasses} xl:col-span-2`}>
                 <div className="mb-4">
                   <h2 className={titleClasses}>Revenue Trend</h2>
-                  <p className={subtitleClasses}>Estimated revenue from stock-out transactions.</p>
+                  <p className={subtitleClasses}>
+                    Estimated revenue from stock-out transactions.
+                  </p>
                 </div>
 
-                <div className="h-56 min-w-0">
-                  {revenueData.length === 0 ? (
-                    <EmptyState title="No revenue data yet" message="Revenue trends will appear after sales are recorded." />
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%">
+                {revenueData.length === 0 ? (
+                  <EmptyState
+                    title="No revenue data yet"
+                    message="Revenue trends will appear after sales are recorded."
+                  />
+                ) : (
+                  <ChartBox>
+                    <ResponsiveContainer
+                      width="100%"
+                      height="100%"
+                      minWidth={300}
+                      minHeight={250}
+                    >
                       <LineChart data={revenueData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" vertical={false} />
-                        <XAxis dataKey="date" stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                        <YAxis stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke={chartGridColor}
+                          vertical={false}
+                        />
+
+                        <XAxis
+                          dataKey="date"
+                          stroke={chartAxisColor}
+                          tick={{ fontSize: 12 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+
+                        <YAxis
+                          stroke={chartAxisColor}
+                          tick={{ fontSize: 12 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+
                         <Tooltip
                           cursor={{ stroke: "#334155" }}
                           contentStyle={tooltipStyle}
-                          formatter={(value) => [`₦${value.toLocaleString()}`, "Revenue"]}
+                          formatter={(value) => [
+                            `₦${Number(value).toLocaleString()}`,
+                            "Revenue",
+                          ]}
                         />
-                        <Line type="monotone" dataKey="revenue" stroke="#22d3ee" strokeWidth={3} dot={{ r: 4, fill: "#22d3ee" }} activeDot={{ r: 6 }} />
+
+                        <Line
+                          type="monotone"
+                          dataKey="revenue"
+                          stroke="#06b6d4"
+                          strokeWidth={3}
+                          dot={{ r: 4, fill: "#06b6d4" }}
+                          activeDot={{ r: 6 }}
+                        />
                       </LineChart>
                     </ResponsiveContainer>
-                  )}
-                </div>
+                  </ChartBox>
+                )}
               </div>
 
               <div className={`${cardClasses} xl:col-span-2`}>
                 <div className="mb-4">
                   <h2 className={titleClasses}>Profit Trend</h2>
-                  <p className={subtitleClasses}>Estimated profit from completed sales.</p>
+                  <p className={subtitleClasses}>
+                    Estimated profit from completed sales.
+                  </p>
                 </div>
 
-                <div className="h-56 min-w-0">
-                  {profitData.length === 0 ? (
-                    <EmptyState title="No profit data yet" message="Profit trends will appear after sales are recorded." />
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%">
+                {profitData.length === 0 ? (
+                  <EmptyState
+                    title="No profit data yet"
+                    message="Profit trends will appear after sales are recorded."
+                  />
+                ) : (
+                  <ChartBox>
+                    <ResponsiveContainer
+                      width="100%"
+                      height="100%"
+                      minWidth={300}
+                      minHeight={250}
+                    >
                       <LineChart data={profitData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" vertical={false} />
-                        <XAxis dataKey="date" stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                        <YAxis stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke={chartGridColor}
+                          vertical={false}
+                        />
+
+                        <XAxis
+                          dataKey="date"
+                          stroke={chartAxisColor}
+                          tick={{ fontSize: 12 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+
+                        <YAxis
+                          stroke={chartAxisColor}
+                          tick={{ fontSize: 12 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+
                         <Tooltip
                           cursor={{ stroke: "#334155" }}
                           contentStyle={tooltipStyle}
-                          formatter={(value) => [`₦${value.toLocaleString()}`, "Profit"]}
+                          formatter={(value) => [
+                            `₦${Number(value).toLocaleString()}`,
+                            "Profit",
+                          ]}
                         />
-                        <Line type="monotone" dataKey="profit" stroke="#4ade80" strokeWidth={3} dot={{ r: 4, fill: "#4ade80" }} activeDot={{ r: 6 }} />
+
+                        <Line
+                          type="monotone"
+                          dataKey="profit"
+                          stroke="#22c55e"
+                          strokeWidth={3}
+                          dot={{ r: 4, fill: "#22c55e" }}
+                          activeDot={{ r: 6 }}
+                        />
                       </LineChart>
                     </ResponsiveContainer>
-                  )}
-                </div>
+                  </ChartBox>
+                )}
               </div>
 
               <div className={cardClasses}>
                 <div className="mb-4">
                   <h2 className={titleClasses}>Most Profitable Products</h2>
-                  <p className={subtitleClasses}>Products bringing in the highest profit.</p>
+                  <p className={subtitleClasses}>
+                    Products bringing in the highest profit.
+                  </p>
                 </div>
 
                 <div className="space-y-3">
                   {mostProfitableProducts.length === 0 ? (
-                    <EmptyState title="No profit records" message="Profitable products will appear after sales are recorded." />
+                    <EmptyState
+                      title="No profit records"
+                      message="Profitable products will appear after sales are recorded."
+                    />
                   ) : (
                     mostProfitableProducts.map((product, index) => (
                       <div
                         key={product.name}
-                        className="flex items-center justify-between rounded-xl bg-slate-50 p-3 dark:bg-slate-950"
+                        className="flex flex-col gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-950 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div>
                           <p className="font-semibold text-slate-950 dark:text-white">
                             {index + 1}. {product.name}
                           </p>
-                          <p className="text-xs text-slate-500">Profit generated</p>
+
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Profit generated
+                          </p>
                         </div>
+
                         <p className="font-bold text-green-600 dark:text-green-400">
                           ₦{product.profit?.toLocaleString() || 0}
                         </p>
@@ -342,17 +533,22 @@ function Dashboard() {
               <div className={cardClasses}>
                 <div className="mb-4">
                   <h2 className={titleClasses}>Products Overview</h2>
-                  <p className={subtitleClasses}>Quick view of current product records.</p>
+                  <p className={subtitleClasses}>
+                    Quick view of current product records.
+                  </p>
                 </div>
 
-                <ProductTable products={recentProducts} />
+                <div className="overflow-x-auto">
+                  <ProductTable products={recentProducts} />
+                </div>
               </div>
             </div>
 
-            <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
               <h2 className="text-xl font-semibold text-slate-950 dark:text-white">
                 Recent Activity
               </h2>
+
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                 Latest inventory actions across your system.
               </p>
@@ -370,8 +566,8 @@ function Dashboard() {
                       className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950"
                     >
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                          <div className="flex items-center gap-2">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span
                               className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${getActionClasses(
                                 activity.action
@@ -380,21 +576,21 @@ function Dashboard() {
                               {activity.action}
                             </span>
 
-                            <p className="text-sm font-semibold text-slate-950 dark:text-white">
+                            <p className="break-words text-sm font-semibold text-slate-950 dark:text-white">
                               {activity.productName}
                             </p>
                           </div>
 
-                          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                          <p className="mt-2 break-words text-sm text-slate-600 dark:text-slate-400">
                             {activity.change}
                           </p>
 
-                          <p className="mt-1 text-xs text-slate-500">
+                          <p className="mt-1 break-words text-xs text-slate-500 dark:text-slate-400">
                             SKU: {activity.sku}
                           </p>
                         </div>
 
-                        <span className="shrink-0 text-xs text-slate-500">
+                        <span className="shrink-0 text-xs text-slate-500 dark:text-slate-400">
                           {formatActivityDate(activity.createdAt)}
                         </span>
                       </div>
