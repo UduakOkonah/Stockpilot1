@@ -44,7 +44,7 @@ const tooltipStyle = {
 
 function ChartBox({ children }) {
   return (
-    <div className="relative h-72 w-full min-w-0 overflow-hidden">
+    <div className="relative h-[280px] w-full min-w-[300px] overflow-hidden">
       {children}
     </div>
   );
@@ -262,8 +262,6 @@ function Dashboard() {
                   <ResponsiveContainer
                     width="100%"
                     height="100%"
-                    minWidth={300}
-                    minHeight={250}
                   >
                     <BarChart data={stockMovementData} barSize={36}>
                       <CartesianGrid
@@ -318,8 +316,6 @@ function Dashboard() {
                     <ResponsiveContainer
                       width="100%"
                       height="100%"
-                      minWidth={300}
-                      minHeight={250}
                     >
                       <BarChart data={bestSellingProducts} barSize={28}>
                         <CartesianGrid
@@ -377,8 +373,6 @@ function Dashboard() {
                     <ResponsiveContainer
                       width="100%"
                       height="100%"
-                      minWidth={300}
-                      minHeight={250}
                     >
                       <LineChart data={revenueData}>
                         <CartesianGrid
@@ -443,8 +437,6 @@ function Dashboard() {
                     <ResponsiveContainer
                       width="100%"
                       height="100%"
-                      minWidth={300}
-                      minHeight={250}
                     >
                       <LineChart data={profitData}>
                         <CartesianGrid
@@ -560,9 +552,8 @@ function Dashboard() {
                     message="Inventory updates, product changes, and sales activity will appear here."
                   />
                 ) : (
-                  activities.map((activity) => (
-                    <div
-                      key={activity._id}
+                activities.map((activity, index) => (
+                  <div key={`${activity._id}-${index}`}
                       className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950"
                     >
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

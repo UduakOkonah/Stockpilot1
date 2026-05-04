@@ -1,7 +1,44 @@
-import { Pencil, Trash2, Plus, Minus } from "lucide-react";
+import { ImageIcon, Minus, Pencil, Plus, Trash2 } from "lucide-react";
 import EmptyState from "./EmptyState";
 
-function ProductTable({ products, onEdit, onDelete, onStockIn, onStockOut }) {
+function getImageUrl(image) {
+  if (!image) return "";
+  if (image.startsWith("http")) return image;
+
+  const baseUrl =
+    import.meta.env.VITE_API_URL?.replace("/api", "") ||
+    "http://localhost:5000";
+
+  return `${baseUrl}${image}`;
+}
+
+function ProductImage({ product }) {
+  const imageUrl = getImageUrl(product.image);
+
+  if (!imageUrl) {
+    return (
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+        <ImageIcon size={20} />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={imageUrl}
+      alt={product.name}
+      className="h-12 w-12 shrink-0 rounded-xl object-cover"
+    />
+  );
+}
+
+function ProductTable({
+  products = [],
+  onEdit,
+  onDelete,
+  onStockIn,
+  onStockOut,
+}) {
   const getStatusClasses = (status) => {
     if (status === "In Stock") {
       return "bg-green-500/15 text-green-600 dark:text-green-300";
@@ -37,13 +74,18 @@ function ProductTable({ products, onEdit, onDelete, onStockIn, onStockOut }) {
               className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="truncate font-semibold text-slate-950 dark:text-white">
-                    {product.name}
-                  </h3>
-                  <p className="mt-1 text-xs text-slate-500">
-                    SKU: {product.sku}
-                  </p>
+                <div className="flex min-w-0 items-start gap-3">
+                  <ProductImage product={product} />
+
+                  <div className="min-w-0">
+                    <h3 className="truncate font-semibold text-slate-950 dark:text-white">
+                      {product.name}
+                    </h3>
+
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      SKU: {product.sku}
+                    </p>
+                  </div>
                 </div>
 
                 <span
@@ -163,21 +205,32 @@ function ProductTable({ products, onEdit, onDelete, onStockIn, onStockOut }) {
                     key={product._id}
                     className="border-b border-slate-200 text-slate-700 last:border-b-0 dark:border-slate-800 dark:text-slate-300"
                   >
-                    <td className="px-5 py-4 font-medium text-slate-950 dark:text-white">
-                      {product.name}
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <ProductImage product={product} />
+
+                        <span className="font-medium text-slate-950 dark:text-white">
+                          {product.name}
+                        </span>
+                      </div>
                     </td>
+
                     <td className="px-5 py-4">{product.sku}</td>
                     <td className="px-5 py-4">{product.category}</td>
                     <td className="px-5 py-4">{product.quantity}</td>
+
                     <td className="px-5 py-4">
                       {formatMoney(product.costPrice)}
                     </td>
+
                     <td className="px-5 py-4">
                       {formatMoney(product.price)}
                     </td>
+
                     <td className="px-5 py-4 font-semibold text-green-600 dark:text-green-400">
                       {formatMoney(profitPerUnit)}
                     </td>
+
                     <td className="px-5 py-4">
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusClasses(
@@ -187,6 +240,7 @@ function ProductTable({ products, onEdit, onDelete, onStockIn, onStockOut }) {
                         {product.status}
                       </span>
                     </td>
+
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
                         <button

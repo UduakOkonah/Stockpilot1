@@ -43,6 +43,8 @@ const createProduct = async (req, res) => {
       });
     }
 
+    const image = req.file ? `/uploads/products/${req.file.filename}` : "";
+
     const product = await Product.create({
       user: req.user._id,
       name: name?.trim(),
@@ -50,6 +52,7 @@ const createProduct = async (req, res) => {
       category: category?.trim(),
       quantity: Number(quantity),
       price: Number(price),
+      image,
       costPrice:
         costPrice === "" || costPrice === undefined ? 0 : Number(costPrice),
       reorderLevel:
@@ -87,6 +90,7 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
+
     const {
       name,
       sku,
@@ -107,7 +111,9 @@ const updateProduct = async (req, res) => {
     });
 
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({
+        message: "Product not found",
+      });
     }
 
     const existingSkuProduct = await Product.findOne({
@@ -127,6 +133,7 @@ const updateProduct = async (req, res) => {
     const oldCostPrice = product.costPrice;
     const oldCategory = product.category;
     const oldName = product.name;
+    const oldImage = product.image;
 
     product.name = name?.trim();
     product.sku = normalizedSku;
@@ -141,6 +148,10 @@ const updateProduct = async (req, res) => {
         : Number(reorderLevel);
     product.supplier = supplier?.trim() || "";
     product.description = description?.trim() || "";
+
+    if (req.file) {
+      product.image = `/uploads/products/${req.file.filename}`;
+    }
 
     const updatedProduct = await product.save();
 
@@ -172,6 +183,10 @@ const updateProduct = async (req, res) => {
       changes.push(
         `quantity changed from ${oldQuantity} to ${updatedProduct.quantity}`
       );
+    }
+
+    if (oldImage !== updatedProduct.image) {
+      changes.push("product image was updated");
     }
 
     await Activity.create({
@@ -210,7 +225,9 @@ const deleteProduct = async (req, res) => {
     });
 
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({
+        message: "Product not found",
+      });
     }
 
     await Activity.create({
@@ -226,7 +243,9 @@ const deleteProduct = async (req, res) => {
       user: req.user._id,
     });
 
-    res.status(200).json({ message: "Product deleted successfully" });
+    res.status(200).json({
+      message: "Product deleted successfully",
+    });
   } catch (error) {
     res.status(500).json({
       message: "Failed to delete product",
