@@ -135,6 +135,7 @@ function TransactionTable({ transactions, onGenerateReceipt }) {
               <tr>
                 <th className="px-5 py-4 font-medium">Product</th>
                 <th className="px-5 py-4 font-medium">SKU</th>
+                <th className="px-5 py-4 font-medium">Barcode</th>
                 <th className="px-5 py-4 font-medium">Type</th>
                 <th className="px-5 py-4 font-medium">Quantity</th>
                 <th className="px-5 py-4 font-medium">Unit Price</th>

@@ -21,6 +21,7 @@ const createProduct = async (req, res) => {
     const {
       name,
       sku,
+      barcode,
       category,
       quantity,
       price,
@@ -49,6 +50,7 @@ const createProduct = async (req, res) => {
       user: req.user._id,
       name: name?.trim(),
       sku: normalizedSku,
+      barcode: barcode?.trim() || "",
       category: category?.trim(),
       quantity: Number(quantity),
       price: Number(price),
@@ -94,6 +96,7 @@ const updateProduct = async (req, res) => {
     const {
       name,
       sku,
+      barcode,
       category,
       quantity,
       price,
@@ -137,6 +140,7 @@ const updateProduct = async (req, res) => {
 
     product.name = name?.trim();
     product.sku = normalizedSku;
+    product.barcode = barcode?.trim() || "";
     product.category = category?.trim();
     product.quantity = Number(quantity);
     product.price = Number(price);

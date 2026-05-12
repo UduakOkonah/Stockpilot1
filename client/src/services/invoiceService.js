@@ -1,11 +1,16 @@
-import API from "./api";
+import api from "./api";
 
-export const getInvoices = async () => {
-  const response = await API.get("/invoices");
+export const createInvoice = async (invoiceData) => {
+  const response = await api.post("/invoices", invoiceData);
   return response.data;
 };
 
-export const createInvoice = async (invoiceData) => {
-  const response = await API.post("/invoices", invoiceData);
+export const getInvoices = async () => {
+  const response = await api.get("/invoices");
+  return response.data;
+};
+
+export const sendInvoiceEmail = async (id) => {
+  const response = await api.post(`/invoices/${id}/send-email`);
   return response.data;
 };

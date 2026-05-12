@@ -4,11 +4,15 @@ import EmptyState from "../components/ui/EmptyState";
 import Skeleton from "../components/ui/Skeleton";
 import { getProducts } from "../services/productService";
 import { getBusinessProfile } from "../services/businessProfileService";
-import { createInvoice, getInvoices } from "../services/invoiceService";
+import {
+  createInvoice,
+  getInvoices,
+  sendInvoiceEmail,
+} from "../services/invoiceService";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import toast from "react-hot-toast";
-import { FileText, Plus, Save, Trash2 } from "lucide-react";
+import { FileText, Mail, Plus, Save, Trash2 } from "lucide-react";
 
 function InvoiceBuilder() {
   const [products, setProducts] = useState([]);
@@ -16,6 +20,7 @@ function InvoiceBuilder() {
   const [invoices, setInvoices] = useState([]);
 
   const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
 
@@ -28,58 +33,57 @@ function InvoiceBuilder() {
   const [savingInvoice, setSavingInvoice] = useState(false);
   const [error, setError] = useState("");
 
-const currency = businessProfile?.currency || "NGN";
-const receiptPrefix = businessProfile?.receiptPrefix || "SP";
-const businessName =
-  businessProfile?.businessName || "StockPilot Business";
+  const currency = businessProfile?.currency || "NGN";
+  const receiptPrefix = businessProfile?.receiptPrefix || "SP";
+  const businessName = businessProfile?.businessName || "StockPilot Business";
 
-const generateInvoiceNumber = () => {
-  const prefix = businessProfile?.receiptPrefix || "SP";
-  return `${prefix}-INV-${Date.now()}`;
-};
-
-const [invoiceNumber, setInvoiceNumber] = useState(generateInvoiceNumber);
-
-const inputClasses =
-  "w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500";
-
-const cardClasses =
-  "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900";
-
-useEffect(() => {
-  let isMounted = true;
-
-  const loadData = async () => {
-    try {
-      const [productData, profileData, invoiceData] = await Promise.all([
-        getProducts(),
-        getBusinessProfile(),
-        getInvoices(),
-      ]);
-
-      if (isMounted) {
-        setProducts(productData);
-        setBusinessProfile(profileData);
-        setInvoices(invoiceData);
-        setError("");
-      }
-    } catch {
-      if (isMounted) {
-        setError("Failed to load invoice builder data.");
-      }
-    } finally {
-      if (isMounted) {
-        setLoading(false);
-      }
-    }
+  const generateInvoiceNumber = () => {
+    const prefix = businessProfile?.receiptPrefix || "SP";
+    return `${prefix}-INV-${Date.now()}`;
   };
 
-  loadData();
+  const [invoiceNumber, setInvoiceNumber] = useState(generateInvoiceNumber);
 
-  return () => {
-    isMounted = false;
-  };
-}, []);
+  const inputClasses =
+    "w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500";
+
+  const cardClasses =
+    "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900";
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadData = async () => {
+      try {
+        const [productData, profileData, invoiceData] = await Promise.all([
+          getProducts(),
+          getBusinessProfile(),
+          getInvoices(),
+        ]);
+
+        if (isMounted) {
+          setProducts(productData || []);
+          setBusinessProfile(profileData || null);
+          setInvoices(invoiceData || []);
+          setError("");
+        }
+      } catch {
+        if (isMounted) {
+          setError("Failed to load invoice builder data.");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const selectedProduct = useMemo(
     () => products.find((product) => product._id === selectedProductId),
@@ -224,16 +228,20 @@ useEffect(() => {
       84
     );
 
+    if (invoiceData.customerEmail) {
+      doc.text(`Email: ${invoiceData.customerEmail}`, 14, 91);
+    }
+
     if (invoiceData.customerPhone) {
-      doc.text(`Phone: ${invoiceData.customerPhone}`, 14, 91);
+      doc.text(`Phone: ${invoiceData.customerPhone}`, 14, 98);
     }
 
     if (invoiceData.customerAddress) {
-      doc.text(`Address: ${invoiceData.customerAddress}`, 14, 98);
+      doc.text(`Address: ${invoiceData.customerAddress}`, 14, 105);
     }
 
     autoTable(doc, {
-      startY: invoiceData.customerAddress ? 110 : 102,
+      startY: invoiceData.customerAddress ? 116 : 108,
       head: [["Product", "SKU", "Qty", "Unit Price", "Total"]],
       body: invoiceData.items.map((item) => [
         item.name,
@@ -294,6 +302,7 @@ useEffect(() => {
       const payload = {
         invoiceNumber,
         customerName: customerName.trim(),
+        customerEmail: customerEmail.trim(),
         customerPhone: customerPhone.trim(),
         customerAddress: customerAddress.trim(),
         items,
@@ -307,11 +316,13 @@ useEffect(() => {
       setInvoices((prev) => [savedInvoice, ...prev]);
 
       setCustomerName("");
+      setCustomerEmail("");
       setCustomerPhone("");
       setCustomerAddress("");
       setItems([]);
       setNote("Thank you for your business.");
       setInvoiceNumber(`${receiptPrefix}-INV-${Date.now()}`);
+
       toast.success("Invoice saved successfully.", {
         id: loadingToast,
       });
@@ -339,6 +350,7 @@ useEffect(() => {
     const invoiceData = {
       invoiceNumber,
       customerName,
+      customerEmail,
       customerPhone,
       customerAddress,
       items,
@@ -352,6 +364,33 @@ useEffect(() => {
     setError("");
   };
 
+const handleSendInvoiceEmail = async (invoice) => {
+  try {
+    if (!invoice.customerEmail) {
+      toast.error("Customer email not found.");
+      return;
+    }
+
+    const loadingToast = toast.loading(
+      "Sending invoice email..."
+    );
+
+    const response = await sendInvoiceEmail(invoice._id);
+
+    toast.success(
+      response.message || "Invoice email sent successfully.",
+      {
+        id: loadingToast,
+      }
+    );
+  } catch (error) {
+    toast.error(
+      error?.response?.data?.message ||
+        "Failed to send invoice email."
+    );
+  }
+};
+
   return (
     <AppLayout>
       <section>
@@ -361,7 +400,8 @@ useEffect(() => {
               Invoice Builder
             </h1>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              Create, save, and generate printable invoices from your inventory.
+              Create, save, email, and generate printable invoices from your
+              inventory.
             </p>
           </div>
 
@@ -413,6 +453,14 @@ useEffect(() => {
                       placeholder="Customer name"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
+                      className={inputClasses}
+                    />
+
+                    <input
+                      type="email"
+                      placeholder="Customer email"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
                       className={inputClasses}
                     />
 
@@ -504,7 +552,7 @@ useEffect(() => {
                       Invoice Preview
                     </h2>
                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    {invoiceNumber}
+                      {invoiceNumber}
                     </p>
                   </div>
 
@@ -513,13 +561,13 @@ useEffect(() => {
                   </div>
                 </div>
 
-                    <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-                    {items.length === 0 ? (
-                        <EmptyState
-                        title="No invoice items"
-                        message="Select products and add quantities to build your invoice."
-                        />
-                    ) : (
+                <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+                  {items.length === 0 ? (
+                    <EmptyState
+                      title="No invoice items"
+                      message="Select products and add quantities to build your invoice."
+                    />
+                  ) : (
                     <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
                       <div className="overflow-x-auto">
                         <table className="min-w-full text-left text-sm">
@@ -599,6 +647,7 @@ useEffect(() => {
                       <tr>
                         <th className="px-4 py-3">Invoice</th>
                         <th className="px-4 py-3">Customer</th>
+                        <th className="px-4 py-3">Email</th>
                         <th className="px-4 py-3">Items</th>
                         <th className="px-4 py-3">Total</th>
                         <th className="px-4 py-3">Date</th>
@@ -621,6 +670,10 @@ useEffect(() => {
                           </td>
 
                           <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
+                            {invoice.customerEmail || "—"}
+                          </td>
+
+                          <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
                             {invoice.items.length}
                           </td>
 
@@ -632,15 +685,25 @@ useEffect(() => {
                           <td className="px-4 py-3 text-slate-500">
                             {new Date(invoice.createdAt).toLocaleDateString()}
                           </td>
-
                           <td className="px-4 py-3">
-                            <button
-                              type="button"
-                              onClick={() => generatePdfFromInvoice(invoice)}
-                              className="rounded-lg border border-cyan-500/30 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-500/10 dark:text-cyan-300"
-                            >
-                              PDF
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => generatePdfFromInvoice(invoice)}
+                                className="rounded-lg border border-cyan-500/30 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-500/10 dark:text-cyan-300"
+                              >
+                                PDF
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleSendInvoiceEmail(invoice)}
+                                className="rounded-lg border border-green-500/30 px-3 py-2 text-xs font-semibold text-green-600 transition hover:bg-green-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:text-green-300"
+                                disabled={!invoice.customerEmail}
+                              >
+                                Email
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}

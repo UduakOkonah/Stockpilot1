@@ -85,6 +85,10 @@ function ProductTable({
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       SKU: {product.sku}
                     </p>
+
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      Barcode: {product.barcode || "N/A"}
+                    </p>
                   </div>
                 </div>
 
@@ -99,28 +103,36 @@ function ProductTable({
 
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
-                  <p className="text-xs text-slate-500">Category</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Category
+                  </p>
                   <p className="mt-1 text-slate-700 dark:text-slate-200">
                     {product.category}
                   </p>
                 </div>
 
                 <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
-                  <p className="text-xs text-slate-500">Quantity</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Quantity
+                  </p>
                   <p className="mt-1 font-semibold text-slate-950 dark:text-white">
                     {product.quantity}
                   </p>
                 </div>
 
                 <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
-                  <p className="text-xs text-slate-500">Cost Price</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Cost Price
+                  </p>
                   <p className="mt-1 text-slate-700 dark:text-slate-200">
                     {formatMoney(product.costPrice)}
                   </p>
                 </div>
 
                 <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
-                  <p className="text-xs text-slate-500">Selling Price</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Selling Price
+                  </p>
                   <p className="mt-1 text-slate-700 dark:text-slate-200">
                     {formatMoney(product.price)}
                   </p>
@@ -185,6 +197,7 @@ function ProductTable({
               <tr>
                 <th className="px-5 py-4 font-medium">Product</th>
                 <th className="px-5 py-4 font-medium">SKU</th>
+                <th className="px-5 py-4 font-medium">Barcode</th>
                 <th className="px-5 py-4 font-medium">Category</th>
                 <th className="px-5 py-4 font-medium">Quantity</th>
                 <th className="px-5 py-4 font-medium">Cost Price</th>
@@ -216,6 +229,7 @@ function ProductTable({
                     </td>
 
                     <td className="px-5 py-4">{product.sku}</td>
+                    <td className="px-5 py-4">{product.barcode || "—"}</td>
                     <td className="px-5 py-4">{product.category}</td>
                     <td className="px-5 py-4">{product.quantity}</td>
 
