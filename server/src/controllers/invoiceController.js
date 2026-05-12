@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Invoice = require("../models/Invoice");
 const sendEmail = require("../utils/emailService");
 
@@ -38,15 +39,17 @@ const createInvoice = async (req, res) => {
       note: note?.trim() || "",
     });
 
-    res.status(201).json(invoice);
+    return res.status(201).json(invoice);
   } catch (error) {
+    console.log("CREATE INVOICE ERROR:", error);
+
     if (error.code === 11000) {
       return res.status(400).json({
         message: "This invoice number already exists.",
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Failed to create invoice",
       error: error.message,
     });
@@ -59,9 +62,11 @@ const getInvoices = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(100);
 
-    res.status(200).json(invoices);
+    return res.status(200).json(invoices);
   } catch (error) {
-    res.status(500).json({
+    console.log("GET INVOICES ERROR:", error);
+
+    return res.status(500).json({
       message: "Failed to fetch invoices",
       error: error.message,
     });
@@ -72,40 +77,53 @@ const sendInvoiceEmail = async (req, res) => {
   try {
     const { id } = req.params;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid invoice ID",
+      });
+    }
+
     const invoice = await Invoice.findOne({
       _id: id,
       user: req.user._id,
     });
 
     if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found" });
+      return res.status(404).json({
+        message: "Invoice not found",
+      });
     }
 
-    if (!invoice.customerEmail) {
+    if (!invoice.customerEmail || !invoice.customerEmail.trim()) {
       return res.status(400).json({
         message: "Customer email is missing",
       });
     }
 
     const itemsHtml = invoice.items
-      .map(
-        (item) => `
+      .map((item) => {
+        const name = item.name || "Unnamed item";
+        const quantity = Number(item.quantity || 0);
+        const unitPrice = Number(item.unitPrice || 0);
+        const total = Number(item.total || quantity * unitPrice || 0);
+
+        return `
           <tr>
             <td style="padding:10px;border:1px solid #e5e7eb;">
-              ${item.name}
+              ${name}
             </td>
             <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">
-              ${item.quantity}
+              ${quantity}
             </td>
             <td style="padding:10px;border:1px solid #e5e7eb;text-align:right;">
-              ${invoice.currency} ${Number(item.unitPrice || 0).toLocaleString()}
+              ${invoice.currency} ${unitPrice.toLocaleString()}
             </td>
             <td style="padding:10px;border:1px solid #e5e7eb;text-align:right;">
-              ${invoice.currency} ${Number(item.total || 0).toLocaleString()}
+              ${invoice.currency} ${total.toLocaleString()}
             </td>
           </tr>
-        `
-      )
+        `;
+      })
       .join("");
 
     const html = `
@@ -159,18 +177,18 @@ const sendInvoiceEmail = async (req, res) => {
     `;
 
     await sendEmail({
-      to: invoice.customerEmail,
+      to: invoice.customerEmail.trim(),
       subject: `Invoice ${invoice.invoiceNumber}`,
       html,
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Invoice email sent successfully",
     });
   } catch (error) {
     console.log("SEND EMAIL ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Failed to send invoice email",
       error: error.message,
     });
