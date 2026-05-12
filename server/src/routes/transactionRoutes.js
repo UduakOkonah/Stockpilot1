@@ -1,14 +1,19 @@
 const express = require("express");
-const router = express.Router();
+
 const {
   createTransaction,
   getTransactions,
+  quickSell,
 } = require("../controllers/transactionController");
+
 const { protect } = require("../middleware/authMiddleware");
+
+const router = express.Router();
 
 router.use(protect);
 
-router.post("/", createTransaction);
 router.get("/", getTransactions);
+router.post("/", createTransaction);
+router.post("/quick-sell", quickSell);
 
 module.exports = router;
