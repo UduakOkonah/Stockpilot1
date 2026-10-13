@@ -214,7 +214,3 @@ GitHub:  https://github.com/UduakOkonah
 LinkedIn: https://www.linkedin.com/in/uduakobong-okonah-b5bb96252/
 
 ---
-
-## License
-
-This project is licensed under the MIT License.

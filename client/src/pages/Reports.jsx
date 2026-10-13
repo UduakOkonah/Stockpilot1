@@ -251,6 +251,11 @@ function Reports() {
       };
     }
 
+    console.log("Report Type:", reportType);
+console.log("Period Rows:", analytics.periodRows);
+console.log("Transactions:", transactions);
+console.log("Sales:", transactions.filter(t => t.type === "OUT"));
+
     return {
       title: "Transactions Report",
       headers: [
