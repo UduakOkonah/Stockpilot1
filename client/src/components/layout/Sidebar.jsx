@@ -14,7 +14,7 @@ function Sidebar({ onNavigate }) {
     `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
       isActive
         ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-300"
-        : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
     }`;
 
   return (

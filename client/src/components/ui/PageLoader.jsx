@@ -27,7 +27,7 @@ function PageLoader() {
             StockPilot
           </h2>
 
-          <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
+          <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400 dark:text-slate-400 dark:text-slate-400">
             Loading your workspace...
           </p>
         </div>

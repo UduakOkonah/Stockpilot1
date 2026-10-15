@@ -1,202 +1,294 @@
 const mongoose = require("mongoose");
+const nodemailer = require("nodemailer");
 const Invoice = require("../models/Invoice");
-const sendEmail = require("../utils/emailService");
 
-const createInvoice = async (req, res) => {
+function getOwnerId(req) {
+  return req.user?._id || req.user?.id || null;
+}
+
+function requireOwner(req, res) {
+  const ownerId = getOwnerId(req);
+
+  if (!ownerId || !mongoose.isValidObjectId(ownerId)) {
+    res.status(401).json({
+      success: false,
+      message: "Please log in to access invoices.",
+    });
+    return null;
+  }
+
+  return ownerId;
+}
+
+function calculateItems(items) {
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error("Add at least one product to the invoice.");
+  }
+
+  return items.map((item) => {
+    const productId = item.product || item.productId;
+    const quantity = Number(item.quantity);
+    const unitPrice = Number(item.unitPrice);
+
+    if (!mongoose.isValidObjectId(productId)) {
+      throw new Error("One of the invoice products has an invalid ID.");
+    }
+
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      throw new Error("Item quantities must be positive whole numbers.");
+    }
+
+    if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+      throw new Error("Item prices must be valid non-negative numbers.");
+    }
+
+    const name = String(item.name || "").trim();
+
+    if (!name) {
+      throw new Error("Each invoice item must have a product name.");
+    }
+
+    return {
+      product: productId,
+      name,
+      sku: String(item.sku || "").trim(),
+      quantity,
+      unitPrice,
+      total: Number((quantity * unitPrice).toFixed(2)),
+    };
+  });
+}
+
+function validEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+exports.createInvoice = async (req, res) => {
   try {
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
+
     const {
-      invoiceNumber,
       customerName,
-      customerEmail,
-      customerPhone,
-      customerAddress,
-      items,
-      subtotal,
-      currency,
-      note,
+      customerEmail = "",
+      customerAddress = "",
+      items: requestItems,
+      currency = "NGN",
+      note = "",
     } = req.body;
 
-    if (!invoiceNumber) {
-      return res.status(400).json({ message: "Invoice number is required" });
-    }
-
-    if (!items || items.length === 0) {
+    if (typeof customerName !== "string" || !customerName.trim()) {
       return res.status(400).json({
-        message: "Invoice must have at least one item",
+        success: false,
+        message: "Customer name is required.",
       });
     }
+
+    if (
+      customerEmail &&
+      (typeof customerEmail !== "string" || !validEmail(customerEmail.trim()))
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Enter a valid customer email.",
+      });
+    }
+
+    const items = calculateItems(requestItems);
+    const subtotal = Number(
+      items.reduce((sum, item) => sum + item.total, 0).toFixed(2)
+    );
+
+    const safeCurrency =
+      typeof currency === "string" && /^[A-Z]{3}$/i.test(currency.trim())
+        ? currency.trim().toUpperCase()
+        : "NGN";
 
     const invoice = await Invoice.create({
-      user: req.user._id,
-      invoiceNumber,
-      customerName: customerName?.trim() || "",
-      customerEmail: customerEmail?.trim() || "",
-      customerPhone: customerPhone?.trim() || "",
-      customerAddress: customerAddress?.trim() || "",
+      customerName: customerName.trim(),
+      customerEmail: customerEmail.trim().toLowerCase(),
+      customerAddress:
+        typeof customerAddress === "string" ? customerAddress.trim() : "",
       items,
-      subtotal: Number(subtotal) || 0,
-      currency: currency || "NGN",
-      note: note?.trim() || "",
+      subtotal,
+      total: subtotal,
+      currency: safeCurrency,
+      note: typeof note === "string" ? note.trim() : "",
+      createdBy: ownerId,
     });
 
-    return res.status(201).json(invoice);
+    return res.status(201).json({
+      success: true,
+      message: "Invoice saved successfully.",
+      data: invoice,
+    });
   } catch (error) {
-    console.log("CREATE INVOICE ERROR:", error);
+    console.error("Create invoice error:", error);
 
-    if (error.code === 11000) {
-      return res.status(400).json({
-        message: "This invoice number already exists.",
+    return res.status(error.message?.startsWith("Add at least") ||
+      error.message?.startsWith("One of") ||
+      error.message?.startsWith("Item ") ||
+      error.message?.startsWith("Each invoice")
+      ? 400
+      : 500).json({
+        success: false,
+        message:
+          error.name === "ValidationError"
+            ? error.message
+            : error.message || "Failed to save invoice.",
       });
-    }
-
-    return res.status(500).json({
-      message: "Failed to create invoice",
-      error: error.message,
-    });
   }
 };
 
-const getInvoices = async (req, res) => {
+exports.getInvoices = async (req, res) => {
   try {
-    const invoices = await Invoice.find({ user: req.user._id })
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
+
+    const invoices = await Invoice.find({ createdBy: ownerId })
       .sort({ createdAt: -1 })
-      .limit(100);
+      .lean();
 
-    return res.status(200).json(invoices);
+    return res.status(200).json({
+      success: true,
+      count: invoices.length,
+      data: invoices,
+    });
   } catch (error) {
-    console.log("GET INVOICES ERROR:", error);
+    console.error("Get invoices error:", error);
 
     return res.status(500).json({
-      message: "Failed to fetch invoices",
-      error: error.message,
+      success: false,
+      message: "Failed to retrieve invoices.",
     });
   }
 };
 
-const sendInvoiceEmail = async (req, res) => {
+exports.getInvoiceById = async (req, res) => {
   try {
-    const { id } = req.params;
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({
-        message: "Invalid invoice ID",
+        success: false,
+        message: "Invalid invoice ID.",
       });
     }
 
     const invoice = await Invoice.findOne({
-      _id: id,
-      user: req.user._id,
-    });
+      _id: req.params.id,
+      createdBy: ownerId,
+    }).lean();
 
     if (!invoice) {
       return res.status(404).json({
-        message: "Invoice not found",
+        success: false,
+        message: "Invoice not found.",
       });
     }
-
-    if (!invoice.customerEmail || !invoice.customerEmail.trim()) {
-      return res.status(400).json({
-        message: "Customer email is missing",
-      });
-    }
-
-    const itemsHtml = invoice.items
-      .map((item) => {
-        const name = item.name || "Unnamed item";
-        const quantity = Number(item.quantity || 0);
-        const unitPrice = Number(item.unitPrice || 0);
-        const total = Number(item.total || quantity * unitPrice || 0);
-
-        return `
-          <tr>
-            <td style="padding:10px;border:1px solid #e5e7eb;">
-              ${name}
-            </td>
-            <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">
-              ${quantity}
-            </td>
-            <td style="padding:10px;border:1px solid #e5e7eb;text-align:right;">
-              ${invoice.currency} ${unitPrice.toLocaleString()}
-            </td>
-            <td style="padding:10px;border:1px solid #e5e7eb;text-align:right;">
-              ${invoice.currency} ${total.toLocaleString()}
-            </td>
-          </tr>
-        `;
-      })
-      .join("");
-
-    const html = `
-      <div style="font-family:Arial,sans-serif;background:#f8fafc;padding:24px;">
-        <div style="max-width:680px;margin:auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;">
-          <div style="background:#020617;color:#ffffff;padding:24px;">
-            <h2 style="margin:0;">StockPilot Invoice</h2>
-            <p style="margin:8px 0 0;color:#cbd5e1;">
-              Invoice No: ${invoice.invoiceNumber}
-            </p>
-          </div>
-
-          <div style="padding:24px;">
-            <p>Hello ${invoice.customerName || "Customer"},</p>
-
-            <p>
-              Thank you for your purchase. Your invoice receipt is below.
-            </p>
-
-            <table style="width:100%;border-collapse:collapse;margin-top:20px;">
-              <thead>
-                <tr style="background:#f1f5f9;">
-                  <th style="padding:10px;border:1px solid #e5e7eb;text-align:left;">Product</th>
-                  <th style="padding:10px;border:1px solid #e5e7eb;text-align:center;">Qty</th>
-                  <th style="padding:10px;border:1px solid #e5e7eb;text-align:right;">Unit Price</th>
-                  <th style="padding:10px;border:1px solid #e5e7eb;text-align:right;">Total</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                ${itemsHtml}
-              </tbody>
-            </table>
-
-            <h3 style="text-align:right;margin-top:24px;">
-              Total: ${invoice.currency} ${Number(invoice.subtotal || 0).toLocaleString()}
-            </h3>
-
-            ${
-              invoice.note
-                ? `<p style="margin-top:20px;"><strong>Note:</strong> ${invoice.note}</p>`
-                : ""
-            }
-
-            <p style="margin-top:32px;color:#64748b;font-size:13px;">
-              Generated by StockPilot Smart Inventory System.
-            </p>
-          </div>
-        </div>
-      </div>
-    `;
-
-    await sendEmail({
-      to: invoice.customerEmail.trim(),
-      subject: `Invoice ${invoice.invoiceNumber}`,
-      html,
-    });
 
     return res.status(200).json({
-      message: "Invoice email sent successfully",
+      success: true,
+      data: invoice,
     });
   } catch (error) {
-    console.log("SEND EMAIL ERROR:", error);
+    console.error("Get invoice error:", error);
 
     return res.status(500).json({
-      message: "Failed to send invoice email",
-      error: error.message,
+      success: false,
+      message: "Failed to retrieve invoice.",
     });
   }
 };
 
-module.exports = {
-  createInvoice,
-  getInvoices,
-  sendInvoiceEmail,
+exports.sendInvoiceEmail = async (req, res) => {
+  try {
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
+
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid invoice ID.",
+      });
+    }
+
+    const invoice = await Invoice.findOne({
+      _id: req.params.id,
+      createdBy: ownerId,
+    });
+
+    if (!invoice) {
+      return res.status(404).json({
+        success: false,
+        message: "Invoice not found.",
+      });
+    }
+
+    if (!invoice.customerEmail || !validEmail(invoice.customerEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: "Add a valid customer email before sending this invoice.",
+      });
+    }
+
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      return res.status(503).json({
+        success: false,
+        message: "Invoice email is not configured on the server.",
+      });
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const itemLines = invoice.items.map(
+      (item) =>
+        `${item.name} x ${item.quantity} — ${invoice.currency} ${Number(
+          item.total
+        ).toFixed(2)}`
+    );
+
+    await transporter.sendMail({
+      from: `"StockPilot" <${process.env.EMAIL_USER}>`,
+      to: invoice.customerEmail,
+      subject: `Invoice ${invoice.invoiceNumber} from StockPilot`,
+      text: [
+        `Hello ${invoice.customerName},`,
+        "",
+        "Here are your invoice details:",
+        `Invoice number: ${invoice.invoiceNumber}`,
+        "",
+        ...itemLines,
+        "",
+        `Subtotal: ${invoice.currency} ${Number(invoice.subtotal).toFixed(2)}`,
+        `Total: ${invoice.currency} ${Number(invoice.total).toFixed(2)}`,
+        invoice.note ? `Note: ${invoice.note}` : "",
+        "",
+        "Thank you for your business.",
+      ].filter(Boolean).join("\n"),
+    });
+
+    invoice.status = "sent";
+    await invoice.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Invoice email sent successfully.",
+      data: invoice,
+    });
+  } catch (error) {
+    console.error("Send invoice email error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send invoice email. Please try again later.",
+    });
+  }
 };

@@ -1,21 +1,78 @@
-import { ImageIcon, Minus, Pencil, Plus, Trash2 } from "lucide-react";
-import EmptyState from "./EmptyState";
+import { useMemo, useState } from "react";
+import {
+  ChevronDown,
+  ChevronUp,
+  ImageIcon,
+  Minus,
+  Package,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
 
-function getImageUrl(image) {
-  if (!image) return "";
-  if (image.startsWith("http")) return image;
+/* -----------------------------
+   Helpers
+----------------------------- */
 
-  const baseUrl =
-    import.meta.env.VITE_API_URL?.replace("/api", "") ||
-    "http://localhost:5000";
+const LOW_STOCK_THRESHOLD = 5;
 
-  return `${baseUrl}${image}`;
+function formatMoney(value) {
+  const amount = Number(value);
+
+  if (!Number.isFinite(amount)) return "₦0.00";
+
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
 }
 
-function ProductImage({ product }) {
-  const imageUrl = getImageUrl(product.image);
+function getQuantity(product) {
+  return Math.max(0, Number(product?.quantity ?? 0) || 0);
+}
 
-  if (!imageUrl) {
+function getCostPrice(product) {
+  return Number(product?.costPrice ?? product?.cost ?? 0) || 0;
+}
+
+function getSellingPrice(product) {
+  return Number(product?.price ?? product?.sellingPrice ?? 0) || 0;
+}
+
+function getProfitPerUnit(product) {
+  return getSellingPrice(product) - getCostPrice(product);
+}
+
+function getImageUrl(product) {
+  return (
+    product?.imageUrl ||
+    product?.image ||
+    product?.imageURL ||
+    product?.photo ||
+    ""
+  );
+}
+
+function getStockStatus(product) {
+  const quantity = getQuantity(product);
+
+  if (quantity <= 0) return "Out of stock";
+  if (quantity <= LOW_STOCK_THRESHOLD) return "Low stock";
+
+  return "In stock";
+}
+
+/* -----------------------------
+   Product image
+----------------------------- */
+
+function ProductImage({ product }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const imageUrl = getImageUrl(product);
+
+  if (!imageUrl || imageFailed) {
     return (
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
         <ImageIcon size={20} />
@@ -26,283 +83,491 @@ function ProductImage({ product }) {
   return (
     <img
       src={imageUrl}
-      alt={product.name}
-      className="h-12 w-12 shrink-0 rounded-xl object-cover"
+      alt={product?.name || "Product"}
+      loading="lazy"
+      onError={() => setImageFailed(true)}
+      className="h-12 w-12 shrink-0 rounded-xl border border-slate-200 object-cover dark:border-slate-700"
     />
   );
 }
 
-function ProductTable({
+/* -----------------------------
+   Stock status badge
+----------------------------- */
+
+function StatusBadge({ product }) {
+  const status = getStockStatus(product);
+
+  const styles = {
+    "In stock":
+      "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
+    "Low stock":
+      "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
+    "Out of stock":
+      "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400",
+  };
+
+  return (
+    <span
+      className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${styles[status]}`}
+    >
+      {status}
+    </span>
+  );
+}
+
+/* -----------------------------
+   Action button
+----------------------------- */
+
+function ActionButton({
+  label,
+  onClick,
+  children,
+  danger = false,
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={label}
+      aria-label={label}
+      className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+        danger
+          ? "text-rose-500 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-500/10"
+          : "text-slate-500 hover:bg-slate-100 hover:text-cyan-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-cyan-300"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/* -----------------------------
+   Product actions
+----------------------------- */
+
+function ProductActions({
+  product,
+  onEdit,
+  onDelete,
+  onStockIn,
+  onStockOut,
+}) {
+  return (
+    <div className="flex items-center justify-end gap-1">
+      {onStockIn && (
+        <ActionButton
+          label={`Add stock to ${product?.name || "product"}`}
+          onClick={() => onStockIn(product)}
+        >
+          <Plus size={17} />
+        </ActionButton>
+      )}
+
+      {onStockOut && (
+        <ActionButton
+          label={`Remove stock from ${product?.name || "product"}`}
+          onClick={() => onStockOut(product)}
+        >
+          <Minus size={17} />
+        </ActionButton>
+      )}
+
+      {onEdit && (
+        <ActionButton
+          label={`Edit ${product?.name || "product"}`}
+          onClick={() => onEdit(product)}
+        >
+          <Pencil size={16} />
+        </ActionButton>
+      )}
+
+      {onDelete && (
+        <ActionButton
+          label={`Delete ${product?.name || "product"}`}
+          onClick={() => onDelete(product)}
+          danger
+        >
+          <Trash2 size={16} />
+        </ActionButton>
+      )}
+    </div>
+  );
+}
+
+/* -----------------------------
+   Sort header
+----------------------------- */
+
+function SortHeader({
+  column,
+  children,
+  className = "",
+  sortBy,
+  sortDirection,
+  onSort,
+}) {
+  const isActive = sortBy === column;
+
+  return (
+    <th
+      scope="col"
+      aria-sort={
+        isActive
+          ? sortDirection === "asc"
+            ? "ascending"
+            : "descending"
+          : "none"
+      }
+      className={`whitespace-nowrap px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 ${className}`}
+    >
+      <button
+        type="button"
+        onClick={() => onSort(column)}
+        className="inline-flex items-center gap-1.5 transition hover:text-cyan-600 dark:hover:text-cyan-300"
+      >
+        {children}
+
+        {isActive &&
+          (sortDirection === "asc" ? (
+            <ChevronUp size={14} />
+          ) : (
+            <ChevronDown size={14} />
+          ))}
+      </button>
+    </th>
+  );
+}
+
+/* -----------------------------
+   Product table
+----------------------------- */
+
+export default function ProductTable({
   products = [],
   onEdit,
   onDelete,
   onStockIn,
   onStockOut,
 }) {
-  const getStatusClasses = (status) => {
-    if (status === "In Stock") {
-      return "bg-green-500/15 text-green-600 dark:text-green-300";
+  const [sortBy, setSortBy] = useState("name");
+  const [sortDirection, setSortDirection] = useState("asc");
+
+  const safeProducts = Array.isArray(products) ? products : [];
+
+  const sortedProducts = useMemo(() => {
+    const getSortValue = (product) => {
+      switch (sortBy) {
+        case "category":
+          return String(product?.category ?? "").toLowerCase();
+
+        case "quantity":
+          return getQuantity(product);
+
+        case "price":
+          return getSellingPrice(product);
+
+        case "profit":
+          return getProfitPerUnit(product);
+
+        case "status":
+          return getStockStatus(product);
+
+        case "name":
+        default:
+          return String(product?.name ?? "").toLowerCase();
+      }
+    };
+
+    return [...safeProducts].sort((a, b) => {
+      const first = getSortValue(a);
+      const second = getSortValue(b);
+
+      let comparison = 0;
+
+      if (
+        typeof first === "number" &&
+        typeof second === "number"
+      ) {
+        comparison = first - second;
+      } else {
+        comparison = String(first).localeCompare(String(second));
+      }
+
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [safeProducts, sortBy, sortDirection]);
+
+  function handleSort(column) {
+    if (sortBy === column) {
+      setSortDirection((current) =>
+        current === "asc" ? "desc" : "asc"
+      );
+      return;
     }
 
-    if (status === "Low Stock") {
-      return "bg-amber-500/15 text-amber-600 dark:text-amber-300";
-    }
-
-    return "bg-red-500/15 text-red-600 dark:text-red-300";
-  };
-
-  const formatMoney = (value) => `₦${Number(value || 0).toLocaleString()}`;
-
-  if (products.length === 0) {
-    return (
-      <EmptyState
-        title="No products found"
-        message="Start by adding your first inventory item to StockPilot."
-      />
-    );
+    setSortBy(column);
+    setSortDirection("asc");
   }
 
   return (
-    <>
-      <div className="space-y-4 md:hidden">
-        {products.map((product) => {
-          const profitPerUnit = (product.price || 0) - (product.costPrice || 0);
+    <section>
+      {/* Mobile product cards */}
+      <div className="grid grid-cols-1 gap-3 md:hidden">
+        {sortedProducts.map((product, index) => (
+          <article
+            key={
+              product?._id ||
+              product?.id ||
+              product?.sku ||
+              index
+            }
+            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+          >
+            <div className="flex items-start gap-3">
+              <ProductImage product={product} />
 
-          return (
-            <div
-              key={product._id}
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 items-start gap-3">
-                  <ProductImage product={product} />
+              <div className="min-w-0 flex-1">
+                <h3 className="break-words font-semibold text-slate-900 dark:text-slate-100">
+                  {product?.name || "Unnamed product"}
+                </h3>
 
-                  <div className="min-w-0">
-                    <h3 className="truncate font-semibold text-slate-950 dark:text-white">
-                      {product.name}
-                    </h3>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  SKU: {product?.sku || "N/A"}
+                </p>
 
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      SKU: {product.sku}
-                    </p>
-
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      Barcode: {product.barcode || "N/A"}
-                    </p>
-                  </div>
-                </div>
-
-                <span
-                  className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${getStatusClasses(
-                    product.status
-                  )}`}
-                >
-                  {product.status}
-                </span>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  {product?.category || "Uncategorized"}
+                </p>
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Category
-                  </p>
-                  <p className="mt-1 text-slate-700 dark:text-slate-200">
-                    {product.category}
-                  </p>
-                </div>
+              <StatusBadge product={product} />
+            </div>
 
-                <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Quantity
-                  </p>
-                  <p className="mt-1 font-semibold text-slate-950 dark:text-white">
-                    {product.quantity}
-                  </p>
-                </div>
-
-                <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Cost Price
-                  </p>
-                  <p className="mt-1 text-slate-700 dark:text-slate-200">
-                    {formatMoney(product.costPrice)}
-                  </p>
-                </div>
-
-                <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Selling Price
-                  </p>
-                  <p className="mt-1 text-slate-700 dark:text-slate-200">
-                    {formatMoney(product.price)}
-                  </p>
-                </div>
-
-                <div className="col-span-2 rounded-xl border border-green-500/20 bg-green-500/10 p-3">
-                  <p className="text-xs text-green-600 dark:text-green-300">
-                    Profit / Unit
-                  </p>
-                  <p className="mt-1 font-semibold text-green-700 dark:text-green-400">
-                    {formatMoney(profitPerUnit)}
-                  </p>
-                </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+              <div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Quantity
+                </p>
+                <p className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
+                  {getQuantity(product).toLocaleString()}
+                </p>
               </div>
 
-              <div className="mt-4 grid grid-cols-4 gap-2">
-                <button
-                  type="button"
-                  onClick={() => onStockIn?.(product)}
-                  className="rounded-xl border border-green-500/30 py-2 text-green-600 transition hover:bg-green-500/10 dark:text-green-300"
-                  title="Stock In"
-                >
-                  <Plus size={16} className="mx-auto" />
-                </button>
+              <div className="text-right">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Selling price
+                </p>
+                <p className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
+                  {formatMoney(getSellingPrice(product))}
+                </p>
+              </div>
 
-                <button
-                  type="button"
-                  onClick={() => onStockOut?.(product)}
-                  className="rounded-xl border border-amber-500/30 py-2 text-amber-600 transition hover:bg-amber-500/10 dark:text-amber-300"
-                  title="Stock Out"
+              <div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Profit per unit
+                </p>
+                <p
+                  className={`mt-1 font-semibold ${
+                    getProfitPerUnit(product) < 0
+                      ? "text-rose-600 dark:text-rose-400"
+                      : "text-emerald-600 dark:text-emerald-400"
+                  }`}
                 >
-                  <Minus size={16} className="mx-auto" />
-                </button>
+                  {formatMoney(getProfitPerUnit(product))}
+                </p>
+              </div>
 
-                <button
-                  type="button"
-                  onClick={() => onEdit?.(product)}
-                  className="rounded-xl border border-slate-300 py-2 text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                  title="Edit"
-                >
-                  <Pencil size={16} className="mx-auto" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => onDelete?.(product)}
-                  className="rounded-xl border border-red-500/30 py-2 text-red-600 transition hover:bg-red-500/10 dark:text-red-300"
-                  title="Delete"
-                >
-                  <Trash2 size={16} className="mx-auto" />
-                </button>
+              <div className="flex items-center justify-end">
+                <ProductActions
+                  product={product}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onStockIn={onStockIn}
+                  onStockOut={onStockOut}
+                />
               </div>
             </div>
-          );
-        })}
+          </article>
+        ))}
+
+        {sortedProducts.length === 0 && (
+          <div className="rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center dark:border-slate-800 dark:bg-slate-900">
+            <Package
+              size={28}
+              className="mx-auto mb-3 text-slate-400"
+            />
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+              No products yet
+            </h3>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Add a product to start managing your inventory.
+            </p>
+          </div>
+        )}
       </div>
 
+      {/* Desktop table */}
       <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 md:block">
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-slate-500 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-400">
+          <table className="w-full min-w-[1000px] border-collapse text-sm">
+            <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/50">
               <tr>
-                <th className="px-5 py-4 font-medium">Product</th>
-                <th className="px-5 py-4 font-medium">SKU</th>
-                <th className="px-5 py-4 font-medium">Barcode</th>
-                <th className="px-5 py-4 font-medium">Category</th>
-                <th className="px-5 py-4 font-medium">Quantity</th>
-                <th className="px-5 py-4 font-medium">Cost Price</th>
-                <th className="px-5 py-4 font-medium">Selling Price</th>
-                <th className="px-5 py-4 font-medium">Profit / Unit</th>
-                <th className="px-5 py-4 font-medium">Status</th>
-                <th className="px-5 py-4 font-medium">Actions</th>
+                <SortHeader
+                  column="name"
+                  sortBy={sortBy}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                >
+                  Product
+                </SortHeader>
+
+                <SortHeader
+                  column="category"
+                  sortBy={sortBy}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                >
+                  Category
+                </SortHeader>
+
+                <SortHeader
+                  column="quantity"
+                  sortBy={sortBy}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                >
+                  Quantity
+                </SortHeader>
+
+                <SortHeader
+                  column="price"
+                  className="text-right"
+                  sortBy={sortBy}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                >
+                  Selling price
+                </SortHeader>
+
+                <SortHeader
+                  column="profit"
+                  className="text-right"
+                  sortBy={sortBy}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                >
+                  Profit / unit
+                </SortHeader>
+
+                <SortHeader
+                  column="status"
+                  sortBy={sortBy}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                >
+                  Status
+                </SortHeader>
+
+                <th className="px-4 py-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Actions
+                </th>
               </tr>
             </thead>
 
-            <tbody>
-              {products.map((product) => {
-                const profitPerUnit =
-                  (product.price || 0) - (product.costPrice || 0);
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {sortedProducts.map((product, index) => (
+                <tr
+                  key={
+                    product?._id ||
+                    product?.id ||
+                    product?.sku ||
+                    index
+                  }
+                  className="transition hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
+                >
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-3">
+                      <ProductImage product={product} />
 
-                return (
-                  <tr
-                    key={product._id}
-                    className="border-b border-slate-200 text-slate-700 last:border-b-0 dark:border-slate-800 dark:text-slate-300"
-                  >
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <ProductImage product={product} />
+                      <div className="min-w-0">
+                        <p className="max-w-[240px] truncate font-semibold text-slate-900 dark:text-slate-100">
+                          {product?.name || "Unnamed product"}
+                        </p>
 
-                        <span className="font-medium text-slate-950 dark:text-white">
-                          {product.name}
-                        </span>
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                          SKU: {product?.sku || "N/A"}
+                        </p>
                       </div>
-                    </td>
+                    </div>
+                  </td>
 
-                    <td className="px-5 py-4">{product.sku}</td>
-                    <td className="px-5 py-4">{product.barcode || "—"}</td>
-                    <td className="px-5 py-4">{product.category}</td>
-                    <td className="px-5 py-4">{product.quantity}</td>
+                  <td className="px-4 py-4 text-slate-600 dark:text-slate-300">
+                    {product?.category || "Uncategorized"}
+                  </td>
 
-                    <td className="px-5 py-4">
-                      {formatMoney(product.costPrice)}
-                    </td>
+                  <td className="px-4 py-4">
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">
+                      {getQuantity(product).toLocaleString()}
+                    </span>
+                  </td>
 
-                    <td className="px-5 py-4">
-                      {formatMoney(product.price)}
-                    </td>
+                  <td className="px-4 py-4 text-right font-medium text-slate-900 dark:text-slate-100">
+                    {formatMoney(getSellingPrice(product))}
+                  </td>
 
-                    <td className="px-5 py-4 font-semibold text-green-600 dark:text-green-400">
-                      {formatMoney(profitPerUnit)}
-                    </td>
+                  <td className="px-4 py-4 text-right">
+                    <span
+                      className={
+                        getProfitPerUnit(product) < 0
+                          ? "font-medium text-rose-600 dark:text-rose-400"
+                          : "font-medium text-emerald-600 dark:text-emerald-400"
+                      }
+                    >
+                      {formatMoney(getProfitPerUnit(product))}
+                    </span>
+                  </td>
 
-                    <td className="px-5 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusClasses(
-                          product.status
-                        )}`}
-                      >
-                        {product.status}
-                      </span>
-                    </td>
+                  <td className="px-4 py-4">
+                    <StatusBadge product={product} />
+                  </td>
 
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => onStockIn?.(product)}
-                          className="rounded-lg border border-green-500/30 p-2 text-green-600 transition hover:bg-green-500/10 dark:text-green-300"
-                          title="Stock In"
-                        >
-                          <Plus size={16} />
-                        </button>
+                  <td className="px-4 py-4">
+                    <ProductActions
+                      product={product}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                      onStockIn={onStockIn}
+                      onStockOut={onStockOut}
+                    />
+                  </td>
+                </tr>
+              ))}
 
-                        <button
-                          type="button"
-                          onClick={() => onStockOut?.(product)}
-                          className="rounded-lg border border-amber-500/30 p-2 text-amber-600 transition hover:bg-amber-500/10 dark:text-amber-300"
-                          title="Stock Out"
-                        >
-                          <Minus size={16} />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => onEdit?.(product)}
-                          className="rounded-lg border border-slate-300 p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-                          title="Edit"
-                        >
-                          <Pencil size={16} />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => onDelete?.(product)}
-                          className="rounded-lg border border-red-500/30 p-2 text-red-600 transition hover:bg-red-500/10 dark:text-red-300"
-                          title="Delete"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+              {sortedProducts.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-6 py-16 text-center">
+                    <div className="mx-auto flex max-w-sm flex-col items-center">
+                      <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
+                        <Package size={26} />
                       </div>
-                    </td>
-                  </tr>
-                );
-              })}
+
+                      <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+                        No products yet
+                      </h3>
+
+                      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        Add a product to start managing your inventory.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
-    </>
+    </section>
   );
 }
-
-export default ProductTable;

@@ -15,7 +15,7 @@ function EmptyState({
         {title}
       </h3>
 
-      <p className="mt-2 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-400">
+      <p className="mt-2 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-400 dark:text-slate-400 dark:text-slate-400">
         {message}
       </p>
 

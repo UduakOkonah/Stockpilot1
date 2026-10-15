@@ -137,7 +137,7 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
       <form onSubmit={handleSubmit} className="space-y-6 px-6 py-5">
         <div className="grid gap-5 md:grid-cols-2">
           <div className="md:col-span-2">
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               Product Image
             </label>
 
@@ -154,7 +154,7 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
                     <ImagePlus size={28} />
                   </div>
 
-                  <p className="font-medium text-slate-700 dark:text-slate-200">
+                  <p className="font-medium text-slate-700 dark:text-slate-300 dark:text-slate-200">
                     Upload Product Image
                   </p>
 
@@ -174,7 +174,7 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               Product Name
             </label>
 
@@ -184,12 +184,12 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               SKU
             </label>
 
@@ -199,12 +199,12 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
               value={formData.sku}
               onChange={handleChange}
               required
-              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               Barcode
             </label>
 
@@ -214,7 +214,7 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
                 name="barcode"
                 value={formData.barcode}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-cyan-400"
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-cyan-400"
                 placeholder="Scan or enter barcode"
               />
 
@@ -230,7 +230,7 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               Category
             </label>
 
@@ -240,12 +240,12 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
               value={formData.category}
               onChange={handleChange}
               required
-              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               Quantity
             </label>
 
@@ -256,12 +256,12 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
               onChange={handleChange}
               required
               min="0"
-              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               Cost Price
             </label>
 
@@ -272,12 +272,12 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
               onChange={handleChange}
               min="0"
               placeholder="0"
-              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               Selling Price
             </label>
 
@@ -289,12 +289,12 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
               required
               min="0"
               placeholder="0"
-              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               Reorder Level
             </label>
 
@@ -305,7 +305,7 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
               onChange={handleChange}
               min="0"
               placeholder="5"
-              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             />
           </div>
 
@@ -320,7 +320,7 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
           </div>
 
           <div className="md:col-span-2">
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               Supplier
             </label>
 
@@ -330,12 +330,12 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
               value={formData.supplier}
               onChange={handleChange}
               placeholder="e.g Nestle Distributor"
-              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               Description
             </label>
 
@@ -345,7 +345,7 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
               onChange={handleChange}
               rows="4"
               placeholder="Short product description..."
-              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             />
           </div>
         </div>
@@ -360,7 +360,7 @@ function EditProductForm({ product, onClose, onProductUpdated }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl border border-slate-300 px-5 py-3 font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+            className="rounded-2xl border border-slate-300 px-5 py-3 font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             Cancel
           </button>

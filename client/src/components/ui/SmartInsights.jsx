@@ -61,7 +61,7 @@ function SmartInsights({ products, transactions }) {
         Smart Insights
       </h2>
 
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 dark:text-slate-400 dark:text-slate-400">
         Quick inventory signals based on your current records.
       </p>
 
@@ -78,7 +78,7 @@ function SmartInsights({ products, transactions }) {
                 <Icon size={18} />
               </div>
 
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-sm text-slate-600 dark:text-slate-400 dark:text-slate-400 dark:text-slate-400">
                 {insight.title}
               </p>
 

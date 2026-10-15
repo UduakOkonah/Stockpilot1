@@ -64,7 +64,7 @@ function RestockSuggestions({
         Restock Suggestions
       </h2>
 
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 dark:text-slate-400 dark:text-slate-400">
         Based on sales activity and current stock levels.
       </p>
 
@@ -80,15 +80,15 @@ function RestockSuggestions({
               </p>
 
               <div className="mt-2 flex flex-wrap gap-2">
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 dark:text-slate-400 dark:bg-slate-900 dark:text-slate-300">
                   Sold: {product.totalSold}
                 </span>
 
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 dark:text-slate-400 dark:bg-slate-900 dark:text-slate-300">
                   Qty: {product.quantity}
                 </span>
 
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 dark:text-slate-400 dark:bg-slate-900 dark:text-slate-300">
                   Reorder: {product.reorderLevel}
                 </span>
               </div>

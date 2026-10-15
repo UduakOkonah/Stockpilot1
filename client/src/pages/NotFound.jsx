@@ -31,7 +31,7 @@ function NotFound() {
             Page Not Found
           </h1>
 
-          <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-slate-600 dark:text-slate-400 sm:text-lg">
+          <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-slate-600 dark:text-slate-400 dark:text-slate-400 sm:text-lg">
             The page you’re looking for does not exist, may have been moved, or
             the link might be broken.
           </p>
@@ -47,7 +47,7 @@ function NotFound() {
 
             <Link
               to="/"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 dark:text-slate-300 dark:text-slate-300 dark:text-slate-300 dark:text-slate-300 dark:text-slate-300 dark:text-slate-300 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               <Home size={18} />
               Home
@@ -56,7 +56,7 @@ function NotFound() {
             <button
               type="button"
               onClick={() => window.history.back()}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 dark:text-slate-300 dark:text-slate-300 dark:text-slate-300 dark:text-slate-300 dark:text-slate-300 dark:text-slate-300 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               <ArrowLeft size={18} />
               Go Back
@@ -64,7 +64,7 @@ function NotFound() {
           </div>
 
           <div className="mt-14 rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-950">
-            <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
+            <p className="text-sm leading-6 text-slate-600 dark:text-slate-400 dark:text-slate-400">
               Need help? Return to your dashboard or login page to continue
               using StockPilot Smart Inventory System.
             </p>

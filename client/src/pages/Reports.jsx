@@ -374,7 +374,7 @@ console.log("Sales:", transactions.filter(t => t.type === "OUT"));
             <h1 className="text-2xl font-bold text-slate-950 dark:text-white sm:text-3xl">
               Reports Center
             </h1>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 dark:text-slate-400 sm:text-base">
               Export transactions, products, low-stock records, revenue, and
               profit reports.
             </p>
@@ -471,7 +471,7 @@ console.log("Sales:", transactions.filter(t => t.type === "OUT"));
 
             <div className="mb-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 md:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
                   Report Type
                 </label>
                 <select
@@ -487,7 +487,7 @@ console.log("Sales:", transactions.filter(t => t.type === "OUT"));
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
                   Revenue / Profit Period
                 </label>
                 <select
@@ -526,7 +526,7 @@ console.log("Sales:", transactions.filter(t => t.type === "OUT"));
                         {analytics.periodRows.map((row) => (
                           <tr
                             key={row.period}
-                            className="border-b border-slate-200 text-slate-700 last:border-b-0 dark:border-slate-800 dark:text-slate-300"
+                            className="border-b border-slate-200 text-slate-700 dark:text-slate-300 last:border-b-0 dark:border-slate-800 dark:text-slate-300"
                           >
                             <td className="px-5 py-4 font-semibold text-slate-950 dark:text-white">
                               {row.period}

@@ -35,7 +35,7 @@ function LowStockAlerts({ products = [] }) {
         Stock Alerts
       </h2>
 
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 dark:text-slate-400 dark:text-slate-400">
         Products that need attention soon.
       </p>
 

@@ -202,13 +202,13 @@ function Register() {
               Create account
             </h1>
 
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 dark:text-slate-400">
               Start managing your inventory with StockPilot.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} noValidate>
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               Full Name
             </label>
 
@@ -237,7 +237,7 @@ function Register() {
               </p>
             )}
 
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               Email
             </label>
 
@@ -266,7 +266,7 @@ function Register() {
               </p>
             )}
 
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
               Password
             </label>
 
@@ -290,7 +290,7 @@ function Register() {
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-300"
+                className="text-slate-500 transition hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-300"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -328,7 +328,7 @@ function Register() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+          <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400 dark:text-slate-400">
             Already have an account?{" "}
             <Link
               to="/login"

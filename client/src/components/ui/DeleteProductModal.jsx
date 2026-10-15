@@ -60,7 +60,7 @@ function DeleteProductModal({
 
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+            className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
           >
             <X size={18} />
           </button>
@@ -73,7 +73,7 @@ function DeleteProductModal({
             </div>
 
             <div>
-              <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
+              <p className="text-sm leading-6 text-slate-600 dark:text-slate-400 dark:text-slate-400 dark:text-slate-400 dark:text-slate-400 dark:text-slate-300">
                 Are you sure you want to permanently delete this product?
               </p>
 
@@ -83,7 +83,7 @@ function DeleteProductModal({
 
               <div className="mt-3 flex flex-wrap gap-2">
                 {product.category && (
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 dark:text-slate-400 dark:text-slate-400 dark:text-slate-400 dark:bg-slate-800 dark:text-slate-300">
                     {product.category}
                   </span>
                 )}
@@ -110,7 +110,7 @@ function DeleteProductModal({
           <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button
               onClick={onClose}
-              className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
             >
               Cancel
             </button>

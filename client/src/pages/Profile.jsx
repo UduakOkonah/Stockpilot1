@@ -14,6 +14,16 @@ function Profile() {
 
   const userInitial = user?.name?.charAt(0)?.toUpperCase() || "U";
 
+  const joinedDate = user?.createdAt || user?.created_at;
+
+  const formattedJoinedDate = joinedDate
+    ? new Date(joinedDate).toLocaleDateString("en-NG", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : "Not available";
+
   const profileItems = [
     {
       label: "Full Name",
@@ -52,6 +62,7 @@ function Profile() {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[0.9fr_1.3fr]">
+          {/* Profile summary */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex flex-col items-center text-center">
               <div className="relative">
@@ -68,7 +79,7 @@ function Profile() {
                 {user?.name || "StockPilot User"}
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              <p className="mt-1 break-all text-sm text-slate-500 dark:text-slate-400">
                 {user?.email || "No email available"}
               </p>
 
@@ -111,8 +122,8 @@ function Profile() {
                   <span className="text-slate-500 dark:text-slate-400">
                     Access
                   </span>
-                  <span className="font-semibold text-slate-950 dark:text-white">
-                    Owner
+                  <span className="font-semibold capitalize text-slate-950 dark:text-white">
+                    {user?.role || "Owner"}
                   </span>
                 </div>
               </div>
@@ -120,6 +131,7 @@ function Profile() {
           </div>
 
           <div className="space-y-6">
+            {/* Personal information */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
@@ -163,6 +175,7 @@ function Profile() {
               </div>
             </div>
 
+            {/* Account activity */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-slate-950 dark:text-white">
@@ -176,17 +189,23 @@ function Profile() {
 
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950">
-                  <CalendarDays className="mb-3 text-cyan-600 dark:text-cyan-300" size={22} />
+                  <CalendarDays
+                    className="mb-3 text-cyan-600 dark:text-cyan-300"
+                    size={22}
+                  />
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     Joined
                   </p>
                   <p className="mt-2 font-semibold text-slate-950 dark:text-white">
-                    Recently
+                    {formattedJoinedDate}
                   </p>
                 </div>
 
                 <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950">
-                  <ShieldCheck className="mb-3 text-cyan-600 dark:text-cyan-300" size={22} />
+                  <ShieldCheck
+                    className="mb-3 text-cyan-600 dark:text-cyan-300"
+                    size={22}
+                  />
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     Security
                   </p>
@@ -196,12 +215,15 @@ function Profile() {
                 </div>
 
                 <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950">
-                  <Building2 className="mb-3 text-cyan-600 dark:text-cyan-300" size={22} />
+                  <Building2
+                    className="mb-3 text-cyan-600 dark:text-cyan-300"
+                    size={22}
+                  />
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     Workspace
                   </p>
-                  <p className="mt-2 font-semibold text-slate-950 dark:text-white">
-                    StockPilot
+                  <p className="mt-2 break-words font-semibold text-slate-950 dark:text-white">
+                    {user?.businessName || "StockPilot"}
                   </p>
                 </div>
               </div>

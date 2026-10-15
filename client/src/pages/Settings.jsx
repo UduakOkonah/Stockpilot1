@@ -25,7 +25,7 @@ const inputClasses =
   "w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none placeholder:text-slate-400 transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500";
 
 const labelClasses =
-  "mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300";
+  "mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300";
 
 function Toggle({ label, description, checked, onChange, icon: Icon }) {
   return (
@@ -203,13 +203,13 @@ function Settings() {
               Settings
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400 dark:text-slate-400">
               Manage business identity, receipt preferences, display mode, and
               inventory alerts.
             </p>
           </div>
 
-          <div className="flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          <div className="flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
             <Settings2 size={18} />
             System Preferences
           </div>

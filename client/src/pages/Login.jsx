@@ -113,13 +113,13 @@ function Login() {
               Welcome back
             </h1>
 
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 dark:text-slate-400">
               Sign in to manage your StockPilot workspace.
             </p>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300 dark:text-slate-300">
               Email Address
             </label>
 
@@ -140,7 +140,7 @@ function Login() {
               />
             </div>
 
-            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300 dark:text-slate-300">
               Password
             </label>
 
@@ -163,7 +163,7 @@ function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-300"
+                className="text-slate-500 transition hover:text-slate-700 dark:text-slate-300 dark:text-slate-300 dark:hover:text-slate-300"
               >
                 {showPassword ? (
                   <EyeOff size={18} />
@@ -174,7 +174,7 @@ function Login() {
             </div>
 
             <div className="mb-6 flex items-center justify-between gap-4">
-              <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+              <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 dark:text-slate-400">
                 <input
                   type="checkbox"
                   className="rounded border-slate-300 text-cyan-500 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900"
@@ -206,7 +206,7 @@ function Login() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+          <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400 dark:text-slate-400">
             Don&apos;t have an account?{" "}
             <Link
               to="/register"

@@ -164,7 +164,7 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
           <form onSubmit={handleSubmit} className="space-y-6 px-6 py-5">
             <div className="grid gap-5 md:grid-cols-2">
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
                   Product Image
                 </label>
 
@@ -181,7 +181,7 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
                         <ImagePlus size={28} />
                       </div>
 
-                      <p className="font-medium text-slate-700 dark:text-slate-200">
+                      <p className="font-medium text-slate-700 dark:text-slate-300 dark:text-slate-200">
                         Upload Product Image
                       </p>
 
@@ -201,7 +201,7 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
                   Product Name
                 </label>
 
@@ -212,12 +212,12 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
                   onChange={handleChange}
                   required
                   placeholder="e.g Golden Morn"
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
                   SKU
                 </label>
 
@@ -228,12 +228,12 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
                   onChange={handleChange}
                   required
                   placeholder="e.g GM001"
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
                   Barcode
                 </label>
 
@@ -243,7 +243,7 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
                     name="barcode"
                     value={formData.barcode}
                     onChange={handleChange}
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                     placeholder="Scan or enter barcode"
                   />
 
@@ -259,7 +259,7 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
                   Category
                 </label>
 
@@ -270,12 +270,12 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
                   onChange={handleChange}
                   required
                   placeholder="e.g Cereals"
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition placeholder:text-slate-400 focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
                   Quantity
                 </label>
 
@@ -286,12 +286,12 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
                   onChange={handleChange}
                   required
                   min="0"
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
                   Cost Price
                 </label>
 
@@ -302,12 +302,12 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
                   onChange={handleChange}
                   min="0"
                   placeholder="0"
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
                   Selling Price
                 </label>
 
@@ -319,12 +319,12 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
                   required
                   min="0"
                   placeholder="0"
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
                   Reorder Level
                 </label>
 
@@ -335,7 +335,7 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
                   onChange={handleChange}
                   min="0"
                   placeholder="5"
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 />
               </div>
 
@@ -350,7 +350,7 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
                   Supplier
                 </label>
 
@@ -360,12 +360,12 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
                   value={formData.supplier}
                   onChange={handleChange}
                   placeholder="e.g Nestle Distributor"
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300 dark:text-slate-300">
                   Description
                 </label>
 
@@ -375,7 +375,7 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
                   onChange={handleChange}
                   rows="4"
                   placeholder="Short product description..."
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 />
               </div>
             </div>
@@ -390,7 +390,7 @@ function AddProductModal({ isOpen, onClose, onProductAdded }) {
               <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-2xl border border-slate-300 px-5 py-3 font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="rounded-2xl border border-slate-300 px-5 py-3 font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Cancel
               </button>

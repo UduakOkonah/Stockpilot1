@@ -44,7 +44,7 @@ function AppLayout({ children }) {
           <button
             type="button"
             onClick={() => setIsSidebarOpen(true)}
-            className="rounded-lg border border-slate-300 p-2 text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+            className="rounded-lg border border-slate-300 p-2 text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 hover:text-slate-950 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
           >
             <Menu size={20} />
           </button>

@@ -403,7 +403,7 @@ function Transactions() {
               Transactions
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400 sm:text-base">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400 dark:text-slate-400 sm:text-base">
               View stock-in, stock-out, and estimated sales movement history.
             </p>
           </div>
@@ -437,21 +437,21 @@ function Transactions() {
               value: summary.stockInCount,
               className: cardClasses,
               textClass: "text-slate-950 dark:text-white",
-              labelClass: "text-slate-600 dark:text-slate-400",
+              labelClass: "text-slate-600 dark:text-slate-400 dark:text-slate-400",
             },
             {
               label: "Stock Out Records",
               value: summary.stockOutCount,
               className: cardClasses,
               textClass: "text-slate-950 dark:text-white",
-              labelClass: "text-slate-600 dark:text-slate-400",
+              labelClass: "text-slate-600 dark:text-slate-400 dark:text-slate-400",
             },
             {
               label: "Total Units Moved",
               value: summary.totalUnitsMoved,
               className: cardClasses,
               textClass: "text-slate-950 dark:text-white",
-              labelClass: "text-slate-600 dark:text-slate-400",
+              labelClass: "text-slate-600 dark:text-slate-400 dark:text-slate-400",
             },
             {
               label: "Estimated Revenue",

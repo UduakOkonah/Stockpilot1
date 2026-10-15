@@ -198,7 +198,7 @@ function QuickSellScannerModal({
                             SKU: {item.sku} · Stock: {item.availableStock}
                           </p>
 
-                          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 dark:text-slate-400 dark:text-slate-400 dark:text-slate-400 dark:text-slate-300">
                             ₦{item.unitPrice.toLocaleString()} each
                           </p>
                         </div>
@@ -207,7 +207,7 @@ function QuickSellScannerModal({
                           <button
                             type="button"
                             onClick={() => decreaseQty(item.productId)}
-                            className="h-9 w-9 rounded-xl border border-slate-300 text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                            className="h-9 w-9 rounded-xl border border-slate-300 text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                           >
                             -
                           </button>
@@ -219,7 +219,7 @@ function QuickSellScannerModal({
                           <button
                             type="button"
                             onClick={() => increaseQty(item.productId)}
-                            className="h-9 w-9 rounded-xl border border-slate-300 text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                            className="h-9 w-9 rounded-xl border border-slate-300 text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                           >
                             +
                           </button>

@@ -54,7 +54,7 @@ function InstallPrompt() {
           <button
             type="button"
             onClick={() => setShowPrompt(false)}
-            className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white"
+            className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
           >
             <X size={16} />
           </button>
